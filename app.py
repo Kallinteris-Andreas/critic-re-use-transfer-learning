@@ -10,6 +10,7 @@ import time
 experience_replay = collections.namedtuple('Experience', 'old_state, actions, reward, new_state, terminal1')
 #note: actions, old_state, new_state are torch.Tensor reward is float32 scalar, terminal is bool
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class experience_replay_buffer():
     def __init__(self, max_size):
@@ -18,6 +19,8 @@ class experience_replay_buffer():
 
     def add_experience(self, old_state, actions, reward, new_state, is_terminal):
         assert len(self.buffer) <= self.max_size
+        if len(self.buffer) == self.max_size-1:
+            print("filled the ERB")
         if len(self.buffer) != self.max_size:
             self.buffer.append(experience_replay(old_state, actions, reward, new_state, is_terminal))
         else:
@@ -32,7 +35,7 @@ class experience_replay_buffer():
         old_state_batch = torch.stack([exp.old_state for exp in mini_batch])
         new_state_batch = torch.stack([exp.new_state for exp in mini_batch])
         actions_batch = torch.stack([exp.actions for exp in mini_batch])
-        reward_batch = torch.tensor([[exp.reward for exp in mini_batch]], dtype=torch.float32).transpose(0,1)
+        reward_batch = torch.tensor([[exp.reward for exp in mini_batch]], dtype=torch.float32, device=device).transpose(0,1)
         return old_state_batch, actions_batch, reward_batch, new_state_batch
 
 
@@ -45,9 +48,9 @@ def soft_update(target, source, tau):
 class centralized_ddpg_agent_actor(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size):
         super().__init__()
-        self.linear1 = torch.nn.Linear(observation_state_size, 128)
-        self.linear2 = torch.nn.Linear(128, 256)
-        self.linear3 = torch.nn.Linear(256, action_space_size)
+        self.linear1 = torch.nn.Linear(observation_state_size, 128, device=device)
+        self.linear2 = torch.nn.Linear(128, 256, device=device)
+        self.linear3 = torch.nn.Linear(256, action_space_size, device=device)
 
     def forward(self, observations):
         assert isinstance(observations, torch.Tensor)
@@ -56,12 +59,20 @@ class centralized_ddpg_agent_actor(torch.nn.Module):
         output = torch.tanh(self.linear3(output))
         return output
 
+def query_multi_agent_actor_team(actor_team, observations):
+    #result = []
+    #for actor in actor_team:
+        
+
+    None
+
+
 class centralized_ddpg_agent_critic(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size):
         super().__init__()
-        self.linear1 = torch.nn.Linear(action_space_size + observation_state_size, 128)
-        self.linear2 = torch.nn.Linear(128, 256)
-        self.linear3 = torch.nn.Linear(256, 1)
+        self.linear1 = torch.nn.Linear(action_space_size + observation_state_size, 128, device=device)
+        self.linear2 = torch.nn.Linear(128, 256, device=device)
+        self.linear3 = torch.nn.Linear(256, 1, device=device)
 
     def forward(self, observations , actions):
         #assert observations.size(1) == 27
@@ -74,12 +85,11 @@ class centralized_ddpg_agent_critic(torch.nn.Module):
 
 
 if __name__ == "__main__":
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    domain = "Swimmer-v4"
-    env = gymnasium.make("Ant-v4")
-    env_eval = gymnasium.make("Ant-v4", reset_noise_scale = 0)
-    eval_file = open ('DDPG' + str(time.time()), 'w')
+    domain = "Swimmer"
+    env = gymnasium.make(domain + '-v4')
+    env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0)
+    eval_file = open ('results/DDPG_' + domain + '_' + str(time.time()), 'w')
     agent_size_modifier = 1 #len(env.possible_agents)
     num_agents = 1
     num_actions = env.action_space.shape[0] #agent_size_modifier
@@ -98,16 +108,16 @@ if __name__ == "__main__":
     critic_criterion = torch.nn.MSELoss()
 
 
-    erb = experience_replay_buffer(max_size = 10000000)
+    erb = experience_replay_buffer(max_size = 1000 * 1000)
     for episode in range(10000):
-        cur_state = torch.tensor(env.reset(seed=None)[0], dtype=torch.float32)#TODO remove seed=None
+        cur_state = torch.tensor(env.reset(seed=None)[0], dtype=torch.float32).to(device)#TODO remove seed=None
         for step in range(1000):
-            actions = torch.clamp(ddpg_agent_actor(cur_state) + torch.randn(num_actions)*0.01, min = env.action_space.low[0], max = env.action_space.high[0])
-        
+            actions = torch.clamp(ddpg_agent_actor(cur_state) + torch.randn(num_actions).to(device)*0.01, min = env.action_space.low[0], max = env.action_space.high[0])#to_CPU
+
             new_state, reward, is_terminal, is_truncated, info = env.step(actions.tolist())
 
-            erb.add_experience(old_state = cur_state, actions= actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32), is_terminal = is_terminal or is_truncated)
-            cur_state = torch.tensor(new_state, dtype=torch.float32)
+            erb.add_experience(old_state = cur_state, actions= actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32).to(device), is_terminal = is_terminal or is_truncated)
+            cur_state = torch.tensor(new_state, dtype=torch.float32).to(device)
 
             #calulate input date for optimaizers from sampled mini-batch
             old_state_batch, actions_batch, reward_batch, new_state_batch = erb.sample_batch_and_split(mini_batch_size)
@@ -135,12 +145,12 @@ if __name__ == "__main__":
                 break
 
         #evaluate episode
-        cur_state = torch.tensor(env_eval.reset(seed=None)[0], dtype=torch.float32)#TODO remove seed=None
+        cur_state = torch.tensor(env_eval.reset(seed=None)[0], dtype=torch.float32).to(device)
         total_evalution_reward = 0
         for step in range(1000):
             actions = ddpg_agent_actor.forward(cur_state)
             new_state, reward, is_terminal, is_truncated, info = env_eval.step(actions.tolist())
-            cur_state = torch.tensor(new_state, dtype=torch.float32)
+            cur_state = torch.tensor(new_state, dtype=torch.float32).to(device)
             total_evalution_reward += reward
             
             if is_truncated:
