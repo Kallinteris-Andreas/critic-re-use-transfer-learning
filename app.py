@@ -17,7 +17,6 @@ class experience_replay_buffer():
         self.buffer = []
 
     def add_experience(self, old_state, actions, reward, new_state, is_terminal):
-        #breakpoint()
         assert len(self.buffer) <= self.max_size
         if len(self.buffer) != self.max_size:
             self.buffer.append(experience_replay(old_state, actions, reward, new_state, is_terminal))
@@ -43,12 +42,9 @@ def soft_update(target, source, tau):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
 
 
-
-
 class centralized_ddpg_agent_actor(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size):
         super().__init__()
-        #breakpoint()
         self.linear1 = torch.nn.Linear(observation_state_size, 128)
         self.linear2 = torch.nn.Linear(128, 256)
         self.linear3 = torch.nn.Linear(256, action_space_size)
@@ -71,7 +67,6 @@ class centralized_ddpg_agent_critic(torch.nn.Module):
         #assert observations.size(1) == 27
         assert isinstance(observations, torch.Tensor)
         assert isinstance(actions, torch.Tensor)
-        #breakpoint()
         output = self.linear1(torch.cat((observations, actions), dim = 1))
         output = (self.linear2(output))
         value = (self.linear3(output))
@@ -85,13 +80,10 @@ if __name__ == "__main__":
     env = gymnasium.make("Ant-v4")
     env_eval = gymnasium.make("Ant-v4", reset_noise_scale = 0)
     eval_file = open ('DDPG' + str(time.time()), 'w')
-    #env = gymnasium.make("Ant-v4", new_step_api=True)
-    #env_eval = gymnasium.make("Ant-v4", new_step_api=True, reset_noise_scale = 0)
     agent_size_modifier = 1 #len(env.possible_agents)
     num_agents = 1
     num_actions = env.action_space.shape[0] #agent_size_modifier
     num_states = env.observation_space.shape[0] #len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
-    #breakpoint()
 
     learning_rate = 0.99 # gamma / discount_rate
     target_rate = 0.01 # tau
@@ -100,66 +92,45 @@ if __name__ == "__main__":
     ddpg_agent_actor = centralized_ddpg_agent_actor(num_actions, num_states)
     ddpg_agent_target_actor = copy.deepcopy(ddpg_agent_actor)
     ddpg_agent_actor_optimizer = torch.optim.Adam(ddpg_agent_actor.parameters())#TODO check learning rate
-    #assert ddpg_agent_actor != ddpg_agent_target_actor
-    #breakpoint()
     ddpg_agent_critic = centralized_ddpg_agent_critic(num_actions, num_states)
     ddpg_agent_target_critic = copy.deepcopy(ddpg_agent_critic)
     ddpg_agent_critic_optimizer = torch.optim.Adam(ddpg_agent_critic.parameters())
     critic_criterion = torch.nn.MSELoss()
-    #assert ddpg_agent_critic == ddpg_agent_target_critic
 
 
     erb = experience_replay_buffer(max_size = 10000000)
     for episode in range(10000):
         cur_state = torch.tensor(env.reset(seed=None)[0], dtype=torch.float32)#TODO remove seed=None
-        #breakpoint()
         for step in range(1000):
-            #breakpoint()
             actions = torch.clamp(ddpg_agent_actor(cur_state) + torch.randn(num_actions)*0.01, min = env.action_space.low[0], max = env.action_space.high[0])
         
             new_state, reward, is_terminal, is_truncated, info = env.step(actions.tolist())
-            #breakpoint()
 
-
-            #breakpoint()
             erb.add_experience(old_state = cur_state, actions= actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32), is_terminal = is_terminal or is_truncated)
             cur_state = torch.tensor(new_state, dtype=torch.float32)
 
             #calulate input date for optimaizers from sampled mini-batch
-            #breakpoint()
             old_state_batch, actions_batch, reward_batch, new_state_batch = erb.sample_batch_and_split(mini_batch_size)
-            #if step == 1:
-                #breakpoint()
-            #breakpoint()
             q = ddpg_agent_critic(old_state_batch, actions_batch)
             y = reward_batch + learning_rate * ddpg_agent_target_critic(new_state_batch, ddpg_agent_target_actor(new_state_batch))
-            #q_mu = ddpg_agent_critic(old_state_batch, ddpg_agent_actor(old_state_batch))
-            #breakpoint()
 
 
             #update critic
             ddpg_agent_critic_optimizer.zero_grad()
-            #critic_loss = torch.nn.MSELoss(q, y)
-            #breakpoint()
             critic_loss = critic_criterion(q, y)
-            #breakpoint()
-            #if step == 1:
-                #breakpoint()
-            critic_loss.backward()#<--- this lines fails at step==1
+            critic_loss.backward()
             ddpg_agent_critic_optimizer.step()
 
             #update actor
             ddpg_agent_actor_optimizer.zero_grad()
             policy_loss = -ddpg_agent_critic(old_state_batch, ddpg_agent_actor(old_state_batch)).mean()
             policy_loss.backward()
-            #breakpoint()
             ddpg_agent_actor_optimizer.step()
 
             #update target networks
             soft_update(ddpg_agent_target_actor, ddpg_agent_actor, target_rate)
             soft_update(ddpg_agent_target_critic, ddpg_agent_critic, target_rate)
             
-            #if step was truncated, terminate
             if is_truncated:
                 break
 
@@ -172,7 +143,6 @@ if __name__ == "__main__":
             cur_state = torch.tensor(new_state, dtype=torch.float32)
             total_evalution_reward += reward
             
-            #if step was truncated, terminate
             if is_truncated:
                 break
         print("Episode: " + str(episode) + ' reward: ' + str(total_evalution_reward))
