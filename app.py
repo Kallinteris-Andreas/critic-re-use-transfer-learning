@@ -5,6 +5,8 @@ import gymnasium
 import random
 import copy
 import time
+import yaml
+import os
 #from multiagent_mujoco.mujoco_multi import MujocoMulti #https://github.com/schroederdewitt/multiagent_mujoco
 
 experience_replay = collections.namedtuple('Experience', 'old_state, actions, reward, new_state, terminal1')
@@ -83,14 +85,18 @@ def soft_update_target_network(target, source, tau):
 
 
 class DDPG_model():
-    def __init__(self, num_actions, num_states):
+    def __init__(self, num_actions, num_states, yaml_config=None):
         assert num_actions > 0 and num_agents > 0
 
-        self.learning_rate = 0.999999 # gamma / discount_rate
         self.learning_rate = 0.99 # gamma / discount_rate
-        #learning_rate = 1
         self.target_rate = 0.01 # tau
         self.mini_batch_size = 100
+        self.noise_scale = 0.01
+        if yaml_config != None:
+            self.learning_rate = yaml_config['DDPG']['gamma']
+            self.target_rate = yaml_config['DDPG']['tau']
+            self.mini_batch_size = yaml_config['DDPG']['N']
+            self.noise_scale = yaml_config['DDPG']['noise_scale']
         
         self.actor = centralized_ddpg_agent_actor(num_actions, num_states) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
@@ -100,10 +106,13 @@ class DDPG_model():
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters())
         self.critic_criterion = torch.nn.MSELoss()
 
-        self.erb = experience_replay_buffer(max_size = 1000 * 1000)
+        experience_replay_buffer_size = 1000_000
+        if yaml_config != None:
+            experience_replay_buffer_size = yaml_config['DDPG']['experience_replay_buffer_size']
+        self.erb = experience_replay_buffer(experience_replay_buffer_size)
 
     def query_actor(self, state):
-        return torch.clamp(self.actor(state) + torch.randn(num_actions).to(TORCH_DEVICE)*0.01, min = env.action_space.low[0], max = env.action_space.high[0])
+        return torch.clamp(self.actor(state) + torch.randn(num_actions).to(TORCH_DEVICE)*self.noise_scale, min = env.action_space.low[0], max = env.action_space.high[0])
 
     def query_eval_actor(self, state):
         return self.actor(state)
@@ -117,6 +126,8 @@ class DDPG_model():
 
         #update critic
         self.critic_optimizer.zero_grad()
+        
+
         critic_loss = self.critic_criterion(q, y)
         critic_loss.backward()
         self.critic_optimizer.step()
@@ -133,17 +144,20 @@ class DDPG_model():
 
 
 if __name__ == "__main__":
-    domain = "Swimmer"
-    #domain = "Hopper"
+    config = yaml.safe_load(open('config.yaml', 'r'))
+    domain = config['domain']['name']
+
     env = gymnasium.make(domain + '-v4')
     env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0, render_mode='human')
-    eval_file = open ('results/DDPG_' + domain + '_' + str(time.time()), 'w')
+    eval_path = 'results/DDPG_' + domain + '_' + str(time.time()) 
+    os.makedirs(eval_path)
+    eval_file = open(eval_path + '/score.csv', 'w+')
     agent_size_modifier = 1 #len(env.possible_agents)
     num_agents = 1
     num_actions = env.action_space.shape[0] #agent_size_modifier
     num_states = env.observation_space.shape[0] #len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
 
-    DDPG = DDPG_model(num_actions, num_states)
+    DDPG = DDPG_model(num_actions, num_states, config)
 
 
     for episode in range(10000):

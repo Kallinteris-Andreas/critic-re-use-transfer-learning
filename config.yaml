@@ -1,0 +1,8 @@
+domain:
+  name: Swimmer
+DDPG:
+  gamma: 0.99999
+  tau: 0.01
+  N: 100 #mini match size
+  experience_replay_buffer_size: 1000000
+  noise_scale: 0.01 # mean of the action process for exploration
