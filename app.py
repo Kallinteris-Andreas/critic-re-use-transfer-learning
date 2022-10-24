@@ -8,6 +8,7 @@ import time
 #from multiagent_mujoco.mujoco_multi import MujocoMulti #https://github.com/schroederdewitt/multiagent_mujoco
 
 experience_replay = collections.namedtuple('Experience', 'old_state, actions, reward, new_state, terminal1')
+agent_spaces = collections.namedtuple('agent_def', 'observation_space, action_space')
 #note: actions, old_state, new_state are torch.Tensor reward is float32 scalar, terminal is bool
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -85,17 +86,19 @@ class centralized_ddpg_agent_critic(torch.nn.Module):
 
 
 if __name__ == "__main__":
-
-    domain = "Swimmer"
+    #domain = "Swimmer"
+    domain = "Hopper"
     env = gymnasium.make(domain + '-v4')
-    env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0)
+    env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0, render_mode='human')
     eval_file = open ('results/DDPG_' + domain + '_' + str(time.time()), 'w')
     agent_size_modifier = 1 #len(env.possible_agents)
     num_agents = 1
     num_actions = env.action_space.shape[0] #agent_size_modifier
     num_states = env.observation_space.shape[0] #len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
 
+    learning_rate = 0.999999 # gamma / discount_rate
     learning_rate = 0.99 # gamma / discount_rate
+    #learning_rate = 1
     target_rate = 0.01 # tau
     mini_batch_size = 100
 
@@ -110,7 +113,7 @@ if __name__ == "__main__":
 
     erb = experience_replay_buffer(max_size = 1000 * 1000)
     for episode in range(10000):
-        cur_state = torch.tensor(env.reset(seed=None)[0], dtype=torch.float32).to(TORCH_DEVICE)#TODO remove seed=None
+        cur_state = torch.tensor(env.reset()[0], dtype=torch.float32).to(TORCH_DEVICE)
         for step in range(env.spec.max_episode_steps):
             actions = torch.clamp(ddpg_agent_actor(cur_state) + torch.randn(num_actions).to(TORCH_DEVICE)*0.01, min = env.action_space.low[0], max = env.action_space.high[0])#to_CPU
 
@@ -123,7 +126,6 @@ if __name__ == "__main__":
             old_state_batch, actions_batch, reward_batch, new_state_batch = erb.sample_batch_and_split(mini_batch_size)
             q = ddpg_agent_critic(old_state_batch, actions_batch)
             y = reward_batch + learning_rate * ddpg_agent_target_critic(new_state_batch, ddpg_agent_target_actor(new_state_batch))
-
 
             #update critic
             ddpg_agent_critic_optimizer.zero_grad()
@@ -152,6 +154,7 @@ if __name__ == "__main__":
             new_state, reward, is_terminal, is_truncated, info = env_eval.step(actions.tolist())
             cur_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE)
             total_evalution_reward += reward
+            #env.render()
             
             if is_truncated:
                 break
