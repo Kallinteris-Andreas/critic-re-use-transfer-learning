@@ -91,12 +91,12 @@ class DDPG_model():
         self.learning_rate = 0.99 # gamma / discount_rate
         self.target_rate = 0.01 # tau
         self.mini_batch_size = 100
-        self.noise_scale = 0.01
+        self.noise_variance = 0.01
         if yaml_config != None:
             self.learning_rate = yaml_config['DDPG']['gamma']
             self.target_rate = yaml_config['DDPG']['tau']
             self.mini_batch_size = yaml_config['DDPG']['N']
-            self.noise_scale = yaml_config['DDPG']['noise_scale']
+            self.noise_variance = yaml_config['DDPG']['noise_var']
         
         self.actor = centralized_ddpg_agent_actor(num_actions, num_states) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
@@ -112,7 +112,7 @@ class DDPG_model():
         self.erb = experience_replay_buffer(experience_replay_buffer_size)
 
     def query_actor(self, state):
-        return torch.clamp(self.actor(state) + torch.randn(num_actions).to(TORCH_DEVICE)*self.noise_scale, min = env.action_space.low[0], max = env.action_space.high[0])
+        return torch.clamp(self.actor(state) + torch.randn(num_actions).to(TORCH_DEVICE)*(self.noise_variance**0.5), min = env.action_space.low[0], max = env.action_space.high[0])
 
     def query_eval_actor(self, state):
         return self.actor(state)
