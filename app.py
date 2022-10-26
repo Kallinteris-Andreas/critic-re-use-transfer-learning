@@ -1,45 +1,16 @@
 import numpy
-import collections
 import torch
 import gymnasium
-import random
 import copy
 import time
 import yaml
 import os
 import shutil
+from ERB import *
 #from multiagent_mujoco.mujoco_multi import MujocoMulti #https://github.com/schroederdewitt/multiagent_mujoco
 
-experience_replay = collections.namedtuple('Experience', 'old_state, actions, reward, new_state, terminal1')
-#note: actions, old_state, new_state are torch.Tensor reward is float32 scalar, terminal is bool
-agent_spaces = collections.namedtuple('agent_def', 'observation_space, action_space')
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-class experience_replay_buffer():
-    def __init__(self, max_size):
-        self.max_size = max_size
-        self.buffer = collections.deque(maxlen=max_size)
-    def add_experience(self, old_state, actions, reward, new_state, is_terminal):
-        assert len(self.buffer) <= self.max_size
-        if len(self.buffer) == self.max_size-1:
-            print("filled the ERB")
-        self.buffer.append(experience_replay(old_state, actions, reward, new_state, is_terminal))
-
-    def sample_batch(self, batch_size):
-        assert len(self.buffer) != 0
-        return random.sample(self.buffer, min(batch_size, len(self.buffer)))
-
-    def sample_batch_and_split(self, batch_size):
-        mini_batch = self.sample_batch(batch_size) 
-        old_state_batch = torch.stack([exp.old_state for exp in mini_batch])
-        new_state_batch = torch.stack([exp.new_state for exp in mini_batch])
-        actions_batch = torch.stack([exp.actions for exp in mini_batch])
-        reward_batch = torch.tensor([[exp.reward for exp in mini_batch]], dtype=torch.float32, device=TORCH_DEVICE).transpose(0,1)
-        return old_state_batch, actions_batch, reward_batch, new_state_batch
-
-
-
 
 
 class centralized_ddpg_agent_actor(torch.nn.Module):
@@ -115,7 +86,7 @@ class DDPG_model():
         return self.actor(state)
 
     
-    def update_model_step(self):
+    def train_model_step(self):
         #calulate input date for optimaizers from sampled mini-batch
         old_state_batch, actions_batch, reward_batch, new_state_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
         q = self.critic(old_state_batch, actions_batch)
@@ -171,7 +142,7 @@ if __name__ == "__main__":
             DDPG.erb.add_experience(old_state = cur_state, actions= actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE), is_terminal = is_terminal or is_truncated)
             cur_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE)
             
-            DDPG.update_model_step()
+            DDPG.train_model_step()
             
             if is_truncated:
                 break
