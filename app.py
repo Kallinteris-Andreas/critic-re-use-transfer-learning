@@ -24,10 +24,7 @@ class experience_replay_buffer():
         assert len(self.buffer) <= self.max_size
         if len(self.buffer) == self.max_size-1:
             print("filled the ERB")
-        if len(self.buffer) != self.max_size:
-            self.buffer.append(experience_replay(old_state, actions, reward, new_state, is_terminal))
-        else:
-            self.buffer[random.randint(0, max_size-1)] = experience_replay(old_state, actions, reward, new_state, is_terminal)
+        self.buffer.append(experience_replay(old_state, actions, reward, new_state, is_terminal))
 
     def sample_batch(self, batch_size):
         assert len(self.buffer) != 0
