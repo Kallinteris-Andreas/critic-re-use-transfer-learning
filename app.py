@@ -87,6 +87,9 @@ class DDPG_model():
 
     
     def train_model_step(self):
+        if len(self.erb.buffer) < self.mini_batch_size:
+            return
+
         #calulate input date for optimaizers from sampled mini-batch
         old_state_batch, actions_batch, reward_batch, new_state_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
         q = self.critic(old_state_batch, actions_batch)
