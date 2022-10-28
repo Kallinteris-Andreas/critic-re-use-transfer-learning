@@ -38,9 +38,9 @@ class centralized_ddpg_agent_critic(torch.nn.Module):
     def forward(self, observations , actions):
         assert isinstance(observations, torch.Tensor)
         assert isinstance(actions, torch.Tensor)
-        output = self.linear1(torch.cat((observations, actions), dim = 1))
-        output = (self.linear2(output))
-        value = (self.linear3(output))
+        output = torch.tanh(self.linear1(torch.cat((observations, actions), dim = 1)))
+        output = torch.tanh(self.linear2(output))
+        value = torch.tanh(self.linear3(output))
         return value
 
 
@@ -97,6 +97,7 @@ class DDPG_model():
         #update actor
         self.actor_optimizer.zero_grad()
         policy_loss = (-self.critic(old_state_batch, self.actor(old_state_batch))).mean()
+        print(policy_loss)
         policy_loss.backward()
         self.actor_optimizer.step()
 
@@ -149,8 +150,8 @@ if __name__ == "__main__":
         for step in range(env_eval.spec.max_episode_steps):
             actions = DDPG.query_eval_actor(cur_state)
             new_state, reward, is_terminal, is_truncated, info = env_eval.step(actions.tolist())
-            if episode > 100:
-                print('step: ' + str(step) + 'state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
+            #if episode > 100:
+                #print('step: ' + str(step) + 'state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
             cur_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE)
             total_evalution_reward += reward
             
