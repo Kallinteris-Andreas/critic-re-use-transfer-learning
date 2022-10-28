@@ -36,7 +36,6 @@ class centralized_ddpg_agent_critic(torch.nn.Module):
         self.linear3 = torch.nn.Linear(256, 1, device=TORCH_DEVICE)
 
     def forward(self, observations , actions):
-        #assert observations.size(1) == 27
         assert isinstance(observations, torch.Tensor)
         assert isinstance(actions, torch.Tensor)
         output = self.linear1(torch.cat((observations, actions), dim = 1))
@@ -53,18 +52,13 @@ def soft_update_target_network(target, source, tau):
 
 
 class DDPG_model():
-    def __init__(self, num_actions, num_states, yaml_config=None):
+    def __init__(self, num_actions, num_states, yaml_config):
         assert num_actions > 0 and num_agents > 0
 
-        self.learning_rate = 0.99 # gamma / discount_rate
-        self.target_rate = 0.01 # tau
-        self.mini_batch_size = 100
-        self.noise_variance = 0.01
-        if yaml_config != None:
-            self.learning_rate = yaml_config['DDPG']['gamma']
-            self.target_rate = yaml_config['DDPG']['tau']
-            self.mini_batch_size = yaml_config['DDPG']['N']
-            self.noise_variance = yaml_config['DDPG']['noise_var']
+        self.learning_rate = yaml_config['DDPG']['gamma']
+        self.target_rate = yaml_config['DDPG']['tau']
+        self.mini_batch_size = yaml_config['DDPG']['N']
+        self.noise_variance = yaml_config['DDPG']['noise_var']
         
         self.actor = centralized_ddpg_agent_actor(num_actions, num_states) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
@@ -75,8 +69,7 @@ class DDPG_model():
         self.critic_criterion = torch.nn.MSELoss()
 
         experience_replay_buffer_size = 1000_000
-        if yaml_config != None:
-            experience_replay_buffer_size = yaml_config['DDPG']['experience_replay_buffer_size']
+        experience_replay_buffer_size = yaml_config['DDPG']['experience_replay_buffer_size']
         self.erb = experience_replay_buffer(experience_replay_buffer_size)
 
     def query_actor(self, state):
@@ -103,7 +96,7 @@ class DDPG_model():
 
         #update actor
         self.actor_optimizer.zero_grad()
-        policy_loss = -self.critic(old_state_batch, self.actor(old_state_batch)).mean()
+        policy_loss = (-self.critic(old_state_batch, self.actor(old_state_batch))).mean()
         policy_loss.backward()
         self.actor_optimizer.step()
 
@@ -116,8 +109,10 @@ if __name__ == "__main__":
     config = yaml.safe_load(open('config.yaml', 'r'))
     domain = config['domain']['name']
 
-    env = gymnasium.make(domain + '-v4')
-    env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0, render_mode='human')
+    #env = gymnasium.make(domain + '-v4')
+    #env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0, render_mode='human')
+    env = gymnasium.make('Pendulum-v1')
+    env_eval = gymnasium.make('Pendulum-v1', render_mode='human')
 
     #create evaluate file
     eval_path = 'results/DDPG_' + domain + '_' + str(time.time()) 
@@ -133,7 +128,7 @@ if __name__ == "__main__":
     DDPG = DDPG_model(num_actions, num_states, config)
 
 
-    for episode in range(10000):
+    for episode in range(config['domain']['episodes']):
         cur_state = torch.tensor(env.reset()[0], dtype=torch.float32).to(TORCH_DEVICE)
         for step in range(env.spec.max_episode_steps):
             actions = DDPG.query_actor(cur_state)
@@ -155,7 +150,7 @@ if __name__ == "__main__":
             actions = DDPG.query_eval_actor(cur_state)
             new_state, reward, is_terminal, is_truncated, info = env_eval.step(actions.tolist())
             if episode > 100:
-                print('step: ' + str(step) + 'state: ' + str(cur_state.tolist()) + ' actions:' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
+                print('step: ' + str(step) + 'state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
             cur_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE)
             total_evalution_reward += reward
             
