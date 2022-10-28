@@ -97,8 +97,6 @@ class DDPG_model():
 
         #update critic
         self.critic_optimizer.zero_grad()
-        
-
         critic_loss = self.critic_criterion(q, y)
         critic_loss.backward()
         self.critic_optimizer.step()
@@ -147,7 +145,7 @@ if __name__ == "__main__":
             
             DDPG.train_model_step()
             
-            if is_truncated:
+            if is_terminal:
                 break
 
         #evaluate episode
@@ -156,10 +154,12 @@ if __name__ == "__main__":
         for step in range(env_eval.spec.max_episode_steps):
             actions = DDPG.query_eval_actor(cur_state)
             new_state, reward, is_terminal, is_truncated, info = env_eval.step(actions.tolist())
+            if episode > 100:
+                print('step: ' + str(step) + 'state: ' + str(cur_state.tolist()) + ' actions:' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
             cur_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE)
             total_evalution_reward += reward
             
-            if is_truncated:
+            if is_terminal:
                 break
         print("Episode: " + str(episode) + ' reward: ' + str(total_evalution_reward))
         eval_file.write(str(total_evalution_reward) + '\n')
