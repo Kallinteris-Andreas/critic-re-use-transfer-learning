@@ -62,11 +62,11 @@ class DDPG_model():
         
         self.actor = centralized_ddpg_agent_actor(num_actions, num_states) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
-        self.actor_optimizer = torch.optim.Adam(self.actor.parameters())#TODO check learning rate
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), yaml_config['DDPG']['optimizer_gamma'])#TODO check learning rate
         self.critic = centralized_ddpg_agent_critic(num_actions, num_states) # q
         self.target_critic = copy.deepcopy(self.critic) # q'
-        self.critic_optimizer = torch.optim.Adam(self.critic.parameters())
-        self.critic_criterion = torch.nn.MSELoss()
+        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), yaml_config['DDPG']['optimizer_gamma'])
+        #self.critic_criterion = torch.nn.MSELoss()
 
         experience_replay_buffer_size = yaml_config['DDPG']['experience_replay_buffer_size']
         self.erb = experience_replay_buffer(experience_replay_buffer_size)
