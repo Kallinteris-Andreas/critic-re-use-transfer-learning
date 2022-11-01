@@ -109,10 +109,8 @@ if __name__ == "__main__":
     config = yaml.safe_load(open('config.yaml', 'r'))
     domain = config['domain']['name']
 
-    #env = gymnasium.make(domain + '-v4')
-    #env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0, render_mode='human')
-    env = gymnasium.make('Pendulum-v1')
-    env_eval = gymnasium.make('Pendulum-v1', render_mode='human')
+    env = gymnasium.make(domain + '-v4')
+    env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0, render_mode='human')
 
     #create evaluate file
     eval_path = 'results/DDPG_' + domain + '_' + str(time.time()) 
