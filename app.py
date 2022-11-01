@@ -6,6 +6,7 @@ import time
 import yaml
 import os
 import shutil
+import sys
 from ERB import *
 #from multiagent_mujoco.mujoco_multi import MujocoMulti #https://github.com/schroederdewitt/multiagent_mujoco
 
@@ -83,17 +84,23 @@ class DDPG_model():
             return
 
         old_state_batch, actions_batch, reward_batch, new_state_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
+        #print('q: ' + str(torch.transpose(q, 0, 1).detach().to('cpu')))
+        #print('y: ' + str(torch.transpose(y, 0, 1).detach().to('cpu')))
+
+        #update critic
         q = self.critic(old_state_batch, actions_batch)
         y = reward_batch + self.learning_rate * self.target_critic(new_state_batch, self.target_actor(new_state_batch))
         self.critic_optimizer.zero_grad()
+        self.critic_criterion = torch.nn.MSELoss()
         critic_loss = self.critic_criterion(q, y)
+        #print('Critic Lost: ' + str(critic_loss.detach().to('cpu')))
         critic_loss.backward()
         self.critic_optimizer.step()
 
         #update actor
         self.actor_optimizer.zero_grad()
         policy_loss = (-self.critic(old_state_batch, self.actor(old_state_batch))).mean()
-        print(policy_loss)
+        #print('Policy Loss: ' + str(policy_loss.detach().to('cpu')))
         policy_loss.backward()
         self.actor_optimizer.step()
 
@@ -120,20 +127,25 @@ if __name__ == "__main__":
     num_actions = env.action_space.shape[0] #agent_size_modifier
     num_states = env.observation_space.shape[0] #len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
 
-    DDPG = DDPG_model(num_actions, num_states, config)
+    match config['domain']['algo']:
+        case 'DDPG':
+            model = DDPG_model(num_actions, num_states, config)
+        case _:
+            print('invalid learning algorithm')
+            exit(1)
 
 
     for episode in range(config['domain']['episodes']):
         cur_state = torch.tensor(env.reset()[0], dtype=torch.float32).to(TORCH_DEVICE)
         for step in range(env.spec.max_episode_steps):
-            actions = DDPG.query_actor(cur_state)
+            actions = model.query_actor(cur_state)
 
             new_state, reward, is_terminal, is_truncated, info = env.step(actions.tolist())
 
-            DDPG.erb.add_experience(old_state = cur_state, actions= actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE), is_terminal = is_terminal or is_truncated)
+            model.erb.add_experience(old_state = cur_state, actions= actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE), is_terminal = is_terminal or is_truncated)
             cur_state = torch.tensor(new_state, dtype=torch.float32).to(TORCH_DEVICE)
             
-            DDPG.train_model_step()
+            model.train_model_step()
             
             if is_terminal:
                 break
@@ -142,7 +154,7 @@ if __name__ == "__main__":
         cur_state = torch.tensor(env_eval.reset(seed=None)[0], dtype=torch.float32).to(TORCH_DEVICE)
         total_evalution_reward = 0
         for step in range(env_eval.spec.max_episode_steps):
-            actions = DDPG.query_eval_actor(cur_state)
+            actions = model.query_eval_actor(cur_state)
             new_state, reward, is_terminal, is_truncated, info = env_eval.step(actions.tolist())
             #if episode > 100:
                 #print('step: ' + str(step) + 'state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line

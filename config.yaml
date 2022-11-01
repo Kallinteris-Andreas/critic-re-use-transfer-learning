@@ -1,6 +1,7 @@
 domain:
   name: Swimmer
   episodes: 1000
+  algo: DDPG # Valid values: 'DDPG'
 DDPG:
   gamma: 0.95
   tau: 0.01
