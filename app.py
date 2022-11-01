@@ -16,9 +16,9 @@ TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class centralized_ddpg_agent_actor(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size):
         super().__init__()
-        self.linear1 = torch.nn.Linear(observation_state_size, 128, bias=False, device=TORCH_DEVICE)
-        self.linear2 = torch.nn.Linear(128, 256, bias=False, device=TORCH_DEVICE)
-        self.linear3 = torch.nn.Linear(256, action_space_size, bias=False, device=TORCH_DEVICE)
+        self.linear1 = torch.nn.Linear(observation_state_size, 128, bias=True, device=TORCH_DEVICE)
+        self.linear2 = torch.nn.Linear(128, 256, bias=True, device=TORCH_DEVICE)
+        self.linear3 = torch.nn.Linear(256, action_space_size, bias=True, device=TORCH_DEVICE)
 
     def forward(self, observations):
         assert isinstance(observations, torch.Tensor)
