@@ -82,12 +82,9 @@ class DDPG_model():
         if len(self.erb.buffer) < self.mini_batch_size:
             return
 
-        #calulate input date for optimaizers from sampled mini-batch
         old_state_batch, actions_batch, reward_batch, new_state_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
         q = self.critic(old_state_batch, actions_batch)
         y = reward_batch + self.learning_rate * self.target_critic(new_state_batch, self.target_actor(new_state_batch))
-
-        #update critic
         self.critic_optimizer.zero_grad()
         critic_loss = self.critic_criterion(q, y)
         critic_loss.backward()
