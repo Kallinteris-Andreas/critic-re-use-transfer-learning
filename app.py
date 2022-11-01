@@ -68,7 +68,6 @@ class DDPG_model():
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters())
         self.critic_criterion = torch.nn.MSELoss()
 
-        experience_replay_buffer_size = 1000_000
         experience_replay_buffer_size = yaml_config['DDPG']['experience_replay_buffer_size']
         self.erb = experience_replay_buffer(experience_replay_buffer_size)
 
