@@ -10,3 +10,12 @@ DDPG:
   experience_replay_buffer_size: 100000
   sigma: 0.1 # standard deviation of the action process for exploration
   optimizer_gamma: 0.001 # the learning rate of the optimizers
+TD3:
+  gamma: 0.99999 # Reward Discount rate
+  #gamma: 1
+  tau: 0.01 # Target Network Update rate
+  N: 100 # Experience Replay Buffer's mini match size
+  experience_replay_buffer_size: 100000
+  sigma_policy: 0.2 # standard deviation of the action process for policy update
+  sigma_explore: 0.1 # standard deviation of the action process for exploration
+  optimizer_gamma: 0.001 # the learning rate of the optimizers
