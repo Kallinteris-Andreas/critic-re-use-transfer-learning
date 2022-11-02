@@ -8,42 +8,11 @@ import os
 import shutil
 import sys
 from ERB import *
+from modules import *
 #from multiagent_mujoco.mujoco_multi import MujocoMulti #https://github.com/schroederdewitt/multiagent_mujoco
 
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
-class actor(torch.nn.Module):
-    def __init__(self, action_space_size, observation_state_size, bias=True):
-        super().__init__()
-        assert action_space_size > 0 and observation_state_size > 0
-        self.linear1 = torch.nn.Linear(observation_state_size, 128, bias=bias, device=TORCH_DEVICE)
-        self.linear2 = torch.nn.Linear(128, 256, bias=bias, device=TORCH_DEVICE)
-        self.linear3 = torch.nn.Linear(256, action_space_size, bias=bias, device=TORCH_DEVICE)
-
-    def forward(self, observations):
-        assert isinstance(observations, torch.Tensor)
-        output = torch.tanh(self.linear1(observations))
-        output = torch.tanh(self.linear2(output))
-        output = torch.tanh(self.linear3(output))
-        return output
-
-
-class critic(torch.nn.Module):
-    def __init__(self, action_space_size, observation_state_size, bias=False):
-        super().__init__()
-        assert action_space_size > 0 and observation_state_size > 0
-        self.linear1 = torch.nn.Linear(action_space_size + observation_state_size, 128, bias=bias, device=TORCH_DEVICE)
-        self.linear2 = torch.nn.Linear(128, 256, bias=bias, device=TORCH_DEVICE)
-        self.linear3 = torch.nn.Linear(256, 1, bias=bias, device=TORCH_DEVICE)
-
-    def forward(self, observations , actions):
-        assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
-        output = torch.tanh(self.linear1(torch.cat((observations, actions), dim = 1)))
-        output = torch.tanh(self.linear2(output))
-        output = torch.tanh(self.linear3(output))
-        return output
 
 
 #source: https://github.com/ghliu/pytorch-ddpg/blob/master/util.py
@@ -64,7 +33,7 @@ class DDPG_model():
         self.mini_batch_size = yaml_config['DDPG']['N']
         self.noise_standard_deviation = yaml_config['DDPG']['sigma']
         
-        self.actor = actor(num_actions, num_states, True) # mu
+        self.actor = actor(num_actions, num_states, bias=True) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), yaml_config['DDPG']['optimizer_gamma'])
         self.critic = critic(num_actions, num_states, bias=False) # q
