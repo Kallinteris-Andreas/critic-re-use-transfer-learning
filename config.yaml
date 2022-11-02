@@ -3,10 +3,10 @@ domain:
   episodes: 1000
   algo: DDPG # Valid values: 'DDPG'
 DDPG:
-  gamma: 0.99999
+  gamma: 0.99999 # Reward Discount rate
   #gamma: 1
   tau: 0.01 # Target Network Update rate
-  N: 100 #mini match size
+  N: 100 # Experience Replay Buffer's mini match size
   experience_replay_buffer_size: 100000
-  noise_var: 0.1 # variance of the action process for exploration
+  sigma: 0.1 # standard deviation of the action process for exploration
   optimizer_gamma: 0.001 # the learning rate of the optimizers

@@ -8,6 +8,7 @@ experience_replay = collections.namedtuple('Experience', 'old_state, actions, re
 #note: actions, old_state, new_state are torch.Tensor reward is float32 scalar, terminal is bool
 agent_spaces = collections.namedtuple('agent_def', 'observation_space, action_space')
 
+   #TODO store rewards are torch.Tensor
 class experience_replay_buffer():
     def __init__(self, max_size):
         self.max_size = max_size
