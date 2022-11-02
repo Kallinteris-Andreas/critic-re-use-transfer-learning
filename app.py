@@ -33,10 +33,10 @@ class DDPG_model():
         self.mini_batch_size = yaml_config['DDPG']['N']
         self.noise_standard_deviation = yaml_config['DDPG']['sigma']
         
-        self.actor = actor(num_actions, num_states, bias=True) # mu
+        self.actor = actor(num_actions, num_states, bias=True, device=TORCH_DEVICE) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), yaml_config['DDPG']['optimizer_gamma'])
-        self.critic = critic(num_actions, num_states, bias=False) # q
+        self.critic = critic(num_actions, num_states, bias=False, device=TORCH_DEVICE) # q
         self.target_critic = copy.deepcopy(self.critic) # q'
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), yaml_config['DDPG']['optimizer_gamma'])
 
