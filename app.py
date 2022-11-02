@@ -116,12 +116,6 @@ if __name__ == "__main__":
     env = gymnasium.make(domain + '-v4')
     env_eval = gymnasium.make(domain + '-v4', reset_noise_scale = 0, render_mode='human')
 
-    #create evaluate file
-    eval_path = 'results/DDPG_' + domain + '_' + str(time.time()) 
-    os.makedirs(eval_path)
-    eval_file = open(eval_path + '/score.csv', 'w+')
-    shutil.copyfile('./config.yaml', eval_path + '/config.yaml')
-
     agent_size_modifier = 1 #len(env.possible_agents)
     num_agents = 1
     num_actions = env.action_space.shape[0] #agent_size_modifier
@@ -133,6 +127,12 @@ if __name__ == "__main__":
         case _:
             print('invalid learning algorithm')
             exit(1)
+
+    #create evaluate file
+    eval_path = 'results/' + config['domain']['algo'] + '_' + domain + '_' + str(time.time()) 
+    os.makedirs(eval_path)
+    eval_file = open(eval_path + '/score.csv', 'w+')
+    shutil.copyfile('./config.yaml', eval_path + '/config.yaml')
 
 
     for episode in range(config['domain']['episodes']):

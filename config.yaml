@@ -3,8 +3,9 @@ domain:
   episodes: 1000
   algo: DDPG # Valid values: 'DDPG'
 DDPG:
-  gamma: 0.95
-  tau: 0.01
+  gamma: 0.99999
+  #gamma: 1
+  tau: 0.01 # Target Network Update rate
   N: 100 #mini match size
   experience_replay_buffer_size: 100000
   noise_var: 0.1 # variance of the action process for exploration
