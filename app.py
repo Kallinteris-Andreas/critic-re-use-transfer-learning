@@ -109,13 +109,18 @@ class TD3_model():
 
 
         #update critic
-        target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE)*self.noise_policy_standard_deviation).clamp(min= -self.noise_policy_clip, max=self.noise_policy_clip)
-        target_actions_batch = torch.clamp(self.target_actor(new_state_batch) + target_policy_noise, min = env.action_space.low[0], max = env.action_space.high[0])
-        qt0, qt1 = self.target_critics(new_state_batch, target_actions_batch)
-        y = reward_batch + self.discount_rate * torch.min(qt0, qt1)
-        q0, q1 = self.critics(old_state_batch, actions_batch)
+        with torch.no_grad():
+            #select target action
+            target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE)*self.noise_policy_standard_deviation).clamp(min= -self.noise_policy_clip, max=self.noise_policy_clip)
+            target_actions_batch = torch.clamp(self.target_actor(new_state_batch) + target_policy_noise, min = env.action_space.low[0], max = env.action_space.high[0])
+            #compute y
+            qt0, qt1 = self.target_critics(new_state_batch, target_actions_batch)
+            y = reward_batch + self.discount_rate * torch.min(qt0, qt1)
 
+        #compute critic losses
+        q0, q1 = self.critics(old_state_batch, actions_batch)
         critics_loss = torch.nn.functional.mse_loss(q0, y) + torch.nn.functional.mse_loss(q1, y)
+
         self.critics_optimizer.zero_grad()
         critics_loss.backward()
         self.critics_optimizer.step()
