@@ -92,14 +92,6 @@ class TD3_model():
         self.target_critics = copy.deepcopy(self.critics) # q0-1'
         self.critics_optimizer = torch.optim.Adam(self.critics.parameters(), yaml_config['TD3']['optimizer_gamma'])
 
-
-        #self.critic0 = critic(num_actions, num_states, bias=False, device=TORCH_DEVICE) # q0
-        #self.critic1 = critic(num_actions, num_states, bias=False, device=TORCH_DEVICE) # q1
-        #self.target_critic0 = copy.deepcopy(self.critic0) # q0'
-        #self.target_critic1 = copy.deepcopy(self.critic1) # q1
-        #breakpoint()
-        #self.critic_optimizer = torch.optim.Adam(self.critic0.parameters(), yaml_config['TD3']['optimizer_gamma'])
-
         self.erb = experience_replay_buffer(yaml_config['TD3']['experience_replay_buffer_size'])
 
     def query_actor(self, state, add_noise=True):
@@ -117,20 +109,15 @@ class TD3_model():
 
 
         #update critic
-        #y = reward_batch + self.discount_rate * torch.min(self.target_critic0(new_state_batch, target_actions), self.target_critic1(new_state_batch, target_actions))
         target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE)*self.noise_policy_standard_deviation).clamp(min= -self.noise_policy_clip, max=self.noise_policy_clip)
         target_actions_batch = torch.clamp(self.target_actor(new_state_batch) + target_policy_noise, min = env.action_space.low[0], max = env.action_space.high[0])
         qt0, qt1 = self.target_critics(new_state_batch, target_actions_batch)
         y = reward_batch + self.discount_rate * torch.min(qt0, qt1)
         q0, q1 = self.critics(old_state_batch, actions_batch)
 
-        #print('q: ' + str(torch.transpose(q, 0, 1).detach().to('cpu')))
-        #print('y: ' + str(torch.transpose(y, 0, 1).detach().to('cpu')))
         critics_loss = torch.nn.functional.mse_loss(q0, y) + torch.nn.functional.mse_loss(q1, y)
-        #critic_loss = torch.nn.functional.mse_loss(q, y)
         self.critics_optimizer.zero_grad()
         critics_loss.backward()
-        #print('Critic Loss: ' + str(critics_loss.detach().to('cpu')))
         self.critics_optimizer.step()
 
         if (++self.total_step_iterations % self.policy_update_frequency) == 0:
@@ -139,7 +126,6 @@ class TD3_model():
 
             self.actor_optimizer.zero_grad()
             policy_loss.backward()
-            #print('Policy Loss: ' + str(policy_loss.detach().to('cpu')))
             self.actor_optimizer.step()
 
             #update target networks
