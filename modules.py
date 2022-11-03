@@ -32,18 +32,18 @@ class critic(torch.nn.Module):
         output = torch.tanh(self.linear2(output))
         output = torch.tanh(self.linear3(output))
         return output
-    
+
 class twin_critic(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size, bias=False, device='cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
-        self.linear1_0 = torch.nn.linear(action_space_size + observation_state_size, 128, bias=bias, device=device)
-        self.linear2_0 = torch.nn.linear(128, 256, bias=bias, device=device)
-        self.linear3_0 = torch.nn.linear(256, 1, bias=bias, device=device)
+        self.linear1_0 = torch.nn.Linear(action_space_size + observation_state_size, 128, bias=bias, device=device)
+        self.linear2_0 = torch.nn.Linear(128, 256, bias=bias, device=device)
+        self.linear3_0 = torch.nn.Linear(256, 1, bias=bias, device=device)
 
-        self.linear1_1 = torch.nn.linear(action_space_size + observation_state_size, 128, bias=bias, device=device)
-        self.linear2_1 = torch.nn.linear(128, 256, bias=bias, device=device)
-        self.linear3_1 = torch.nn.linear(256, 1, bias=bias, device=device)
+        self.linear1_1 = torch.nn.Linear(action_space_size + observation_state_size, 128, bias=bias, device=device)
+        self.linear2_1 = torch.nn.Linear(128, 256, bias=bias, device=device)
+        self.linear3_1 = torch.nn.Linear(256, 1, bias=bias, device=device)
 
     def forward(self, observations , actions):
         assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
