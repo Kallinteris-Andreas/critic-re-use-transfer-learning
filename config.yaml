@@ -16,6 +16,8 @@ TD3:
   tau: 0.01 # Target Network Update rate
   N: 100 # Experience Replay Buffer's mini match size
   experience_replay_buffer_size: 100000
-  sigma_policy: 0.2 # standard deviation of the action process for policy update
-  sigma_explore: 0.1 # standard deviation of the action process for exploration
-  optimizer_gamma: 0.001 # the learning rate of the optimizers
+  sigma_policy: 0.2 # Standard deviation of the action process for policy update
+  sigma_explore: 0.1 # Standard deviation of the action process for exploration
+  optimizer_gamma: 0.001 # The learning rate of the optimizers
+  noise_policy_clip: 0.5 # Clamping for the target noise
+  d: 2 # Policy Update Frequency
