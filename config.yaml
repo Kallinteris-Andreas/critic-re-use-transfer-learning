@@ -1,7 +1,7 @@
 domain:
   name: Swimmer
   episodes: 1000
-  algo: DDPG # Valid values: 'DDPG'
+  algo: TD3 # Valid values: 'DDPG', 'TD3'
 DDPG:
   gamma: 0.99999 # Reward Discount rate
   #gamma: 1
