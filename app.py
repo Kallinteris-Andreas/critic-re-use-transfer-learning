@@ -176,7 +176,7 @@ if __name__ == "__main__":
             
             model.train_model_step()
             
-            if is_terminal:
+            if is_truncated:
                 break
 
         #evaluate episode
@@ -190,7 +190,7 @@ if __name__ == "__main__":
             cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
             total_evalution_reward += reward
             
-            if is_terminal:
+            if is_truncated:
                 break
         print("Episode: " + str(episode) + ' reward: ' + str(total_evalution_reward))
         eval_file.write(str(total_evalution_reward) + '\n')
