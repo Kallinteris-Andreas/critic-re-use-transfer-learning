@@ -45,11 +45,11 @@ class DDPG_model():
         if len(self.erb.buffer) < self.mini_batch_size:
             return
 
-        old_state_batch, actions_batch, reward_batch, new_state_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
+        old_state_batch, actions_batch, reward_batch, new_state_batch, terminal_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
 
         #update critic
         q = self.critic(old_state_batch, actions_batch)
-        y = reward_batch + self.discount_rate * self.target_critic(new_state_batch, self.target_actor(new_state_batch))
+        y = reward_batch + ~terminal_batch * self.discount_rate * self.target_critic(new_state_batch, self.target_actor(new_state_batch))
         #print('q: ' + str(torch.transpose(q, 0, 1).detach().to('cpu')))
         #print('y: ' + str(torch.transpose(y, 0, 1).detach().to('cpu')))
         self.critic_optimizer.zero_grad()
@@ -105,7 +105,7 @@ class TD3_model():
         if len(self.erb.buffer) < self.mini_batch_size:
             return
 
-        old_state_batch, actions_batch, reward_batch, new_state_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
+        old_state_batch, actions_batch, reward_batch, new_state_batch, terminal_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
 
 
         #update critic
@@ -115,7 +115,7 @@ class TD3_model():
             target_actions_batch = torch.clamp(self.target_actor(new_state_batch) + target_policy_noise, min = env.action_space.low[0], max = env.action_space.high[0])
             #compute y
             qt0, qt1 = self.target_critics(new_state_batch, target_actions_batch)
-            y = reward_batch + self.discount_rate * torch.min(qt0, qt1)
+            y = reward_batch + ~terminal_batch * self.discount_rate * torch.min(qt0, qt1)
 
         #compute critic losses
         q0, q1 = self.critics(old_state_batch, actions_batch)
@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
             new_state, reward, is_terminal, is_truncated, info = env.step(actions.tolist())
 
-            model.erb.add_experience(old_state = cur_state, actions = actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal = is_terminal or is_truncated)
+            model.erb.add_experience(old_state = cur_state, actions = actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal = is_terminal)
             cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
             
             model.train_model_step()

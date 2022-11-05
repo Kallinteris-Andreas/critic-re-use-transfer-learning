@@ -4,7 +4,7 @@ import torch
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-experience_replay = collections.namedtuple('Experience', 'old_state, actions, reward, new_state, terminal1')
+experience_replay = collections.namedtuple('Experience', 'old_state, actions, reward, new_state, is_terminal')
 #note: actions, old_state, new_state are torch.Tensor reward is float32 scalar, terminal is bool
 agent_spaces = collections.namedtuple('agent_def', 'observation_space, action_space')
 
@@ -29,4 +29,5 @@ class experience_replay_buffer():
         new_state_batch = torch.stack([exp.new_state for exp in mini_batch])
         actions_batch = torch.stack([exp.actions for exp in mini_batch])
         reward_batch = torch.tensor([[exp.reward for exp in mini_batch]], dtype=torch.float32, device=TORCH_DEVICE).transpose(0,1)
-        return old_state_batch, actions_batch, reward_batch, new_state_batch
+        terminal_batch = torch.tensor([[exp.is_terminal for exp in mini_batch]], device=TORCH_DEVICE).transpose(0,1)
+        return old_state_batch, actions_batch, reward_batch, new_state_batch, terminal_batch
