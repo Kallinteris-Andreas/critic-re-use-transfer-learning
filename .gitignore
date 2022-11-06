@@ -2,3 +2,4 @@ results/*
 __pypache__/*
 *.pyc
 notes
+multiagent_mujoco
