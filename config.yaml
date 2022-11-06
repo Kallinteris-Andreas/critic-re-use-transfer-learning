@@ -2,6 +2,7 @@ domain:
   name: Swimmer
   episodes: 1000
   algo: TD3 # Valid values: 'DDPG', 'TD3'
+  learning_starts_ep: 10 # Start Learning at episode X, before that fill the ERB with random actions
 DDPG:
   gamma: 0.99999 # Reward Discount rate
   #gamma: 1

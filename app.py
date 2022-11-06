@@ -52,7 +52,8 @@ if __name__ == "__main__":
             model.erb.add_experience(old_state = cur_state, actions = actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal = is_terminal)
             cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
             
-            model.train_model_step()
+            if episode >= config['domain']['learning_starts_ep']:
+                model.train_model_step()
             
             if is_truncated:
                 break
