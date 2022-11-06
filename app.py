@@ -32,8 +32,7 @@ if __name__ == "__main__":
         case 'TD3':
             model = TD3_model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], yaml_config=config)
         case _:
-            print('invalid learning algorithm')
-            exit(1)
+            assert false, 'invalid learning algorithm'
 
     #create evaluate file
     eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['name'] + '_' + str(time.time()) 
