@@ -16,7 +16,7 @@ class actor(torch.nn.Module):
         output = torch.tanh(self.linear1(observations))
         output = torch.tanh(self.linear2(output))
         output = torch.tanh(self.linear3(output))
-        output *= self.max_action
+        output = torch.multiply(output, self.max_action)
         return output
 
 
