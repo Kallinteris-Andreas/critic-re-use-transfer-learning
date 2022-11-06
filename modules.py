@@ -3,18 +3,20 @@ import torch
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class actor(torch.nn.Module):
-    def __init__(self, action_space_size, observation_state_size, bias=True, device='cpu'):
+    def __init__(self, action_space_size, observation_state_size, max_action=1, bias=True, device='cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
         self.linear1 = torch.nn.Linear(observation_state_size, 128, bias=bias, device=device)
         self.linear2 = torch.nn.Linear(128, 256, bias=bias, device=device)
         self.linear3 = torch.nn.Linear(256, action_space_size, bias=bias, device=device)
+        self.max_action = max_action
 
     def forward(self, observations):
         assert isinstance(observations, torch.Tensor)
         output = torch.tanh(self.linear1(observations))
         output = torch.tanh(self.linear2(output))
         output = torch.tanh(self.linear3(output))
+        output *= self.max_action
         return output
 
 

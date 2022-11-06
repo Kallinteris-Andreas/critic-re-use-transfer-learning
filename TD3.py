@@ -20,7 +20,7 @@ class TD3_model():
         self.noise_policy_clip = yaml_config['TD3']['noise_policy_clip']
         self.policy_update_frequency = yaml_config['TD3']['d']
         
-        self.actor = actor(num_actions, num_states, bias=True, device=TORCH_DEVICE) # mu
+        self.actor = actor(num_actions, num_states, max_action, bias=True, device=TORCH_DEVICE) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), yaml_config['TD3']['optimizer_gamma'])
         self.critics= twin_critic(num_actions, num_states, bias=False, device=TORCH_DEVICE) # q0-1
