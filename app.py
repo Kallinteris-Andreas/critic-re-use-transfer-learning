@@ -19,8 +19,8 @@ TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if __name__ == "__main__":
     config = yaml.safe_load(open('config.yaml', 'r'))
 
-    env = gymnasium.make(config['domain']['name'] + '-v4')
-    env_eval = gymnasium.make(config['domain']['name'] + '-v4', reset_noise_scale = 0, render_mode='human')
+    env = gymnasium.make(config['domain']['name'])
+    env_eval = gymnasium.make(config['domain']['name'], reset_noise_scale = 0, render_mode='human')
 
     num_agents = 1
     num_actions = env.action_space.shape[0] #agent_size_modifier
