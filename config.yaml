@@ -11,6 +11,8 @@ DDPG:
   experience_replay_buffer_size: 100000
   sigma: 0.1 # standard deviation of the action process for exploration
   optimizer_gamma: 0.001 # the learning rate of the optimizers
+  mu_bias: True # Bias for the actor module
+  q_bias: True # Bias for the critic module
 TD3:
   gamma: 0.99999 # Reward Discount rate
   #gamma: 1
@@ -22,3 +24,5 @@ TD3:
   optimizer_gamma: 0.001 # The learning rate of the optimizers
   noise_policy_clip: 0.5 # Clamping for the target noise
   d: 2 # Policy Update Frequency
+  mu_bias: True # Bias for the actor module
+  q_bias: True # Bias for the critics module
