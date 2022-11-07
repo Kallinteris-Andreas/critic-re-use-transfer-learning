@@ -73,3 +73,4 @@ if __name__ == "__main__":
                 break
         print("Episode: " + str(episode) + ' reward: ' + str(total_evalution_reward))
         eval_file.write(str(total_evalution_reward) + '\n')
+    print('Finished score can be found at: ' + eval_path + '/score.csv')
