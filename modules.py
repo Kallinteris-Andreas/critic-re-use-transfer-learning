@@ -13,8 +13,8 @@ class actor(torch.nn.Module):
 
     def forward(self, observations):
         assert isinstance(observations, torch.Tensor)
-        output = torch.tanh(self.linear1(observations))
-        output = torch.tanh(self.linear2(output))
+        output = torch.relu(self.linear1(observations))
+        output = torch.relu(self.linear2(output))
         output = torch.tanh(self.linear3(output))
         output = torch.multiply(output, self.max_action)
         return output
@@ -30,9 +30,9 @@ class critic(torch.nn.Module):
 
     def forward(self, observations , actions):
         assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
-        output = torch.tanh(self.linear1(torch.cat((observations, actions), dim = 1)))
-        output = torch.tanh(self.linear2(output))
-        output = torch.tanh(self.linear3(output))
+        output = torch.relu(self.linear1(torch.cat((observations, actions), dim = 1)))
+        output = torch.relu(self.linear2(output))
+        output = (self.linear3(output))
         return output
 
 class twin_critic(torch.nn.Module):
@@ -49,13 +49,13 @@ class twin_critic(torch.nn.Module):
 
     def forward(self, observations , actions):
         assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
-        output_0 = torch.tanh(self.linear1_0(torch.cat((observations, actions), dim = 1)))
-        output_0 = torch.tanh(self.linear2_0(output_0))
-        output_0 = torch.tanh(self.linear3_0(output_0))
+        output_0 = torch.relu(self.linear1_0(torch.cat((observations, actions), dim = 1)))
+        output_0 = torch.relu(self.linear2_0(output_0))
+        output_0 = (self.linear3_0(output_0))
 
-        output_1 = torch.tanh(self.linear1_1(torch.cat((observations, actions), dim = 1)))
-        output_1 = torch.tanh(self.linear2_1(output_1))
-        output_1 = torch.tanh(self.linear3_1(output_1))
+        output_1 = torch.relu(self.linear1_1(torch.cat((observations, actions), dim = 1)))
+        output_1 = torch.relu(self.linear2_1(output_1))
+        output_1 = (self.linear3_1(output_1))
         return output_0, output_1
 
 
