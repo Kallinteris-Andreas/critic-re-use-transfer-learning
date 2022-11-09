@@ -22,7 +22,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default='config.yaml')
     args = parser.parse_args()
-    config = yaml.safe_load(open(args.res, 'r'))
+    config = yaml.safe_load(open(args.config, 'r'))
 
     #env = gymnasium.make(config['domain']['name'])
     #env_eval = gymnasium.make(config['domain']['name'], reset_noise_scale = 0, render_mode='human')
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['name'] + '_' + str(time.time()) 
     os.makedirs(eval_path)
     eval_file = open(eval_path + '/score.csv', 'w+')
-    shutil.copyfile(args.res, eval_path + '/config.yaml')
+    shutil.copyfile(args.config, eval_path + '/config.yaml')
     eval_max_return = -math.inf
 
 
