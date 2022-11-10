@@ -6,6 +6,7 @@ domain:
   init_learn_timestep: 25001 # at which timestep should the agent start learning
   #learning_starts_ep: 10 # Start Learning at episode X, before that fill the ERB with random actions
   evaluation_frequency: 5000 # how ofter should
+  runs: 10 # number of statistical runs
 DDPG:
   gamma: 0.99999 # Reward Discount rate
   #gamma: 1
