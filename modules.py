@@ -6,8 +6,8 @@ class actor(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size, max_action=1, bias=True, device='cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
-        self.linear1 = torch.nn.Linear(observation_state_size, 128, bias=bias, device=device)
-        self.linear2 = torch.nn.Linear(128, 256, bias=bias, device=device)
+        self.linear1 = torch.nn.Linear(observation_state_size, 256, bias=bias, device=device)
+        self.linear2 = torch.nn.Linear(256, 256, bias=bias, device=device)
         self.linear3 = torch.nn.Linear(256, action_space_size, bias=bias, device=device)
         self.max_action = max_action
 
@@ -24,8 +24,8 @@ class critic(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size, bias=False, device='cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
-        self.linear1 = torch.nn.Linear(action_space_size + observation_state_size, 128, bias=bias, device=device)
-        self.linear2 = torch.nn.Linear(128, 256, bias=bias, device=device)
+        self.linear1 = torch.nn.Linear(action_space_size + observation_state_size, 256, bias=bias, device=device)
+        self.linear2 = torch.nn.Linear(256, 256, bias=bias, device=device)
         self.linear3 = torch.nn.Linear(256, 1, bias=bias, device=device)
 
     def forward(self, observations , actions):
@@ -39,12 +39,12 @@ class twin_critic(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size, bias=False, device='cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
-        self.linear1_0 = torch.nn.Linear(action_space_size + observation_state_size, 128, bias=bias, device=device)
-        self.linear2_0 = torch.nn.Linear(128, 256, bias=bias, device=device)
+        self.linear1_0 = torch.nn.Linear(action_space_size + observation_state_size, 256, bias=bias, device=device)
+        self.linear2_0 = torch.nn.Linear(256, 256, bias=bias, device=device)
         self.linear3_0 = torch.nn.Linear(256, 1, bias=bias, device=device)
 
-        self.linear1_1 = torch.nn.Linear(action_space_size + observation_state_size, 128, bias=bias, device=device)
-        self.linear2_1 = torch.nn.Linear(128, 256, bias=bias, device=device)
+        self.linear1_1 = torch.nn.Linear(action_space_size + observation_state_size, 256, bias=bias, device=device)
+        self.linear2_1 = torch.nn.Linear(256, 256, bias=bias, device=device)
         self.linear3_1 = torch.nn.Linear(256, 1, bias=bias, device=device)
 
     def forward(self, observations , actions):
