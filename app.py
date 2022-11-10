@@ -52,7 +52,10 @@ if __name__ == "__main__":
     for episode in range(config['domain']['episodes']):
         cur_state = torch.tensor(env.reset()[0], dtype=torch.float32, device=TORCH_DEVICE)
         for step in range(env.spec.max_episode_steps):
-            actions = model.query_actor(cur_state)
+            if episode >= config['domain']['learning_starts_ep']:
+                actions = model.query_actor(cur_state)
+            else:
+                actions = torch.tensor(env.action_space.sample(), dtype=torch.float32, device=TORCH_DEVICE)
 
             new_state, reward, is_terminal, is_truncated, info = env.step(actions.tolist())
             #print('step: ' + str(step) + ' state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
