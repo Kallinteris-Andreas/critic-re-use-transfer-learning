@@ -1,8 +1,11 @@
 domain:
-  name: Swimmer
-  episodes: 1000
+  name: Hopper-v4
+  total_timesteps: 1000000 # how many learn steps the agent should take
+  #episodes: 1000
   algo: TD3 # Valid values: 'DDPG', 'TD3'
-  learning_starts_ep: 10 # Start Learning at episode X, before that fill the ERB with random actions
+  init_learn_timestep: 25001 # at which timestep should the agent start learning
+  #learning_starts_ep: 10 # Start Learning at episode X, before that fill the ERB with random actions
+  evaluation_frequency: 5000 # how ofter should
 DDPG:
   gamma: 0.99999 # Reward Discount rate
   #gamma: 1
