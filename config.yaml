@@ -12,7 +12,7 @@ DDPG:
   #gamma: 1
   tau: 0.01 # Target Network Update rate
   N: 100 # Experience Replay Buffer's mini match size
-  experience_replay_buffer_size: 100000
+  experience_replay_buffer_size: 1000000
   sigma: 0.1 # standard deviation of the action process for exploration
   optimizer_gamma: 0.001 # the learning rate of the optimizers
   mu_bias: True # Bias for the actor module
@@ -22,7 +22,7 @@ TD3:
   #gamma: 1
   tau: 0.005 # Target Network Update rate
   N: 256 # Experience Replay Buffer's mini match size
-  experience_replay_buffer_size: 100000
+  experience_replay_buffer_size: 1000000
   sigma_policy: 0.2 # Standard deviation of the action process for policy update
   sigma_explore: 0.1 # Standard deviation of the action process for exploration
   optimizer_gamma: 0.001 # The learning rate of the optimizers
