@@ -46,7 +46,7 @@ if __name__ == "__main__":
     shutil.copyfile(args.config, eval_path + '/config.yaml')
 
 
-    for run in range(config['domain']):
+    for run in range(config['domain']['runs']):
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
