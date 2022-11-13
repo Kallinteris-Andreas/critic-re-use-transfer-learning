@@ -1,6 +1,8 @@
 import torch
 import yaml
 import copy
+import random
+import pickle
 from ERB import *
 from modules import *
 
@@ -71,3 +73,24 @@ class TD3_model():
             #update target networks
             soft_update_target_network(self.target_actor, self.actor, self.target_update_rate)
             soft_update_target_network(self.target_critics, self.critics, self.target_update_rate)
+
+
+    def save(self, filename):
+        torch.save(self.critics.state_dict(), filename + "_critic")
+        torch.save(self.critics_optimizer.state_dict(), filename + "_critic_optimizer")
+
+        torch.save(self.actor.state_dict(), filename + "_actor")
+        torch.save(self.actor_optimizer.state_dict(), filename + "_actor_optimizer")
+        
+        with open(filename + '_erb', 'wb') as outp:
+            pickle.dump(self.erb, outp, pickle.HIGHEST_PROTOCOL)
+
+
+    def load(self, filename):
+        self.critics.load_state_dict(torch.load(filename + "_critic"))
+        self.critics_optimizer.load_state_dict(torch.load(filename + "_critic_optimizer"))
+        self.critics_target = copy.deepcopy(self.critic)
+
+        self.actor.load_state_dict(torch.load(filename + "_actor"))
+        self.actor_optimizer.load_state_dict(torch.load(filename + "_actor_optimizer"))
+        self.actor_target = copy.deepcopy(self.actor)

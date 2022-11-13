@@ -84,7 +84,7 @@ if __name__ == "__main__":
                 eval_file.write(str(total_evalution_return) + '\n')
                 if (eval_max_return < total_evalution_return):
                     eval_max_return = total_evalution_return
-                    best_actor = copy.deepcopy(model.actor)
+                    best_model = copy.deepcopy(model)
         print('Run: ' + str(run) + ' Max return: ' + str(eval_max_return))
         print('Finished score can be found at: ' + eval_path + '/score' + str(run) + '.csv')
-        torch.save(best_actor.state_dict(), eval_path + '/best_actor' + str(run) + '.pt')
+        best_model.save(eval_path + '/' + 'best_' + str(run) + '_')
