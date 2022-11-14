@@ -11,12 +11,11 @@ agent_spaces = collections.namedtuple('agent_def', 'observation_space, action_sp
    #TODO store rewards are torch.Tensor
 class experience_replay_buffer():
     def __init__(self, max_size):
-        self.max_size = max_size
         self.buffer = collections.deque(maxlen=max_size)
+
     def add_experience(self, old_state, actions, reward, new_state, is_terminal):
-        assert len(self.buffer) <= self.max_size
-        if len(self.buffer) == self.max_size-1:
-            print("filled the ERB")
+        #if len(self.buffer) == self.buffer.maxlen-1:
+            #print("filled the ERB")
         self.buffer.append(experience_replay(old_state, actions, reward, new_state, is_terminal))
 
     def sample_batch(self, batch_size):
