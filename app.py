@@ -9,6 +9,7 @@ import shutil
 import sys
 import math
 import argparse
+import icecream
 from ERB import *
 from modules import *
 from DDPG import *
@@ -32,12 +33,10 @@ if __name__ == "__main__":
     num_actions = env.action_space.shape[0] #agent_size_modifier
     num_states = env.observation_space.shape[0] #len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
 
-
-    #create evaluate file
+    # create evaluate file
     eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['name'] + '_' + str(time.time()) 
     os.makedirs(eval_path)
     shutil.copyfile(args.config, eval_path + '/config.yaml')
-
 
     for run in range(config['domain']['runs']):
         match config['domain']['algo']:
@@ -60,7 +59,7 @@ if __name__ == "__main__":
             new_state, reward, is_terminal, is_truncated, info = env.step(actions.tolist())
             #print('step: ' + str(step) + ' state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
 
-            model.erb.add_experience(old_state = cur_state, actions = actions.detach(), reward = reward, new_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal = is_terminal)
+            model.erb.add_experience(old_state=cur_state, actions=actions.detach(), reward=reward, new_state=torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal = is_terminal)
             cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
 
             if steps >= config['domain']['init_learn_timestep']:
