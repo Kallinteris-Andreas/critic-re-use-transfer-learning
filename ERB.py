@@ -4,7 +4,7 @@ import torch
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-experience_replay = collections.namedtuple('Experience', 'old_state, actions, reward, new_state, is_terminal')
+experience_replay = collections.namedtuple('experience_replay', 'old_state, actions, reward, new_state, is_terminal')
 #note: actions, old_state, new_state are torch.Tensor reward is float32 scalar, terminal is bool
 agent_spaces = collections.namedtuple('agent_def', 'observation_space, action_space')
 
