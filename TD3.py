@@ -80,7 +80,7 @@ class TD3_model():
         torch.save(self.actor.state_dict(), filename + "_actor")
         torch.save(self.actor_optimizer.state_dict(), filename + "_actor_optimizer")
 
-        pickle.dump(self.erb.buffer, open(filename + '_erb', 'wb'))
+        pickle.dump(self.erb, open(filename + '_erb', 'wb'))
 
     def load(self, filename):
         self.critics.load_state_dict(torch.load(filename + "_critic"))
@@ -90,3 +90,5 @@ class TD3_model():
         self.actor.load_state_dict(torch.load(filename + "_actor"))
         self.actor_optimizer.load_state_dict(torch.load(filename + "_actor_optimizer"))
         self.actor_target = copy.deepcopy(self.actor)
+
+        self.erb = pickle.load(open(filename + '_erb', 'wb'))

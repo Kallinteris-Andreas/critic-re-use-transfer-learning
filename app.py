@@ -87,4 +87,4 @@ if __name__ == "__main__":
                     best_model = copy.deepcopy(model)
         print('Run: ' + str(run) + ' Max return: ' + str(eval_max_return))
         print('Finished score can be found at: ' + eval_path + '/score' + str(run) + '.csv')
-        best_model.save(eval_path + '/' + 'best_' + str(run) + '_')
+        best_model.save(eval_path + '/' + 'best_run' + str(run))
