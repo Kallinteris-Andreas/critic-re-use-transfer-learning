@@ -2,6 +2,7 @@ import torch
 import gymnasium
 import argparse
 import yaml
+import icecream
 from modules import *
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -26,7 +27,7 @@ if __name__ == "__main__":
         cur_state = torch.tensor(env_eval.reset()[0], dtype=torch.float32, device=TORCH_DEVICE)
         total_evalution_return = 0
         for step in range(env_eval.spec.max_episode_steps):
-            actions = mu(cur_state)
+            actions = mu(cur_state, add_noise=False)
             new_state, reward, is_terminal, is_truncated, info = env_eval.step(actions.tolist())
 
             cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
