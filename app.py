@@ -36,10 +36,7 @@ def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10):
             state, reward, terminated, truncated, _ = eval_env.step(action.tolist())
             total_return += reward
 
-    total_return /= eval_episodes
-
-    # print(f"Evaluation over {eval_episodes} episodes: {total_return:.3f}")
-    return total_return
+    return total_return / eval_episodes
 
 
 if __name__ == "__main__":
