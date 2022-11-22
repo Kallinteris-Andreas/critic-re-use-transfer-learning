@@ -45,7 +45,7 @@ if __name__ == "__main__":
             case 'TD3':
                 model = TD3_model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], yaml_config=config)
             case _:
-                assert false, 'invalid learning algorithm'
+                assert False, 'invalid learning algorithm'
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
