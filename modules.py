@@ -39,23 +39,13 @@ class twin_critic(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size, bias=False, device='cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
-        self.linear1_0 = torch.nn.Linear(action_space_size + observation_state_size, 256, bias=bias, device=device)
-        self.linear2_0 = torch.nn.Linear(256, 256, bias=bias, device=device)
-        self.linear3_0 = torch.nn.Linear(256, 1, bias=bias, device=device)
+        self.critic_0 = critic(action_space_size, observation_state_size, bias, device)
+        self.critic_1 = critic(action_space_size, observation_state_size, bias, device)
 
-        self.linear1_1 = torch.nn.Linear(action_space_size + observation_state_size, 256, bias=bias, device=device)
-        self.linear2_1 = torch.nn.Linear(256, 256, bias=bias, device=device)
-        self.linear3_1 = torch.nn.Linear(256, 1, bias=bias, device=device)
-
-    def forward(self, observations , actions):
+    def forward(self, observations, actions):
         assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
-        output_0 = torch.relu(self.linear1_0(torch.cat((observations, actions), dim = 1)))
-        output_0 = torch.relu(self.linear2_0(output_0))
-        output_0 = (self.linear3_0(output_0))
-
-        output_1 = torch.relu(self.linear1_1(torch.cat((observations, actions), dim = 1)))
-        output_1 = torch.relu(self.linear2_1(output_1))
-        output_1 = (self.linear3_1(output_1))
+        output_0 = self.critic_0(observations, actions)
+        output_1 = self.critic_1(observations, actions)
         return output_0, output_1
 
 
