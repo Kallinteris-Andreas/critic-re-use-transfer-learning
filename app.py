@@ -49,8 +49,6 @@ if __name__ == "__main__":
     config = yaml.safe_load(open(args.config, 'r'))
 
     env = gymnasium.make(config['domain']['name'])
-    env_eval = gymnasium.make(config['domain']['name'], reset_noise_scale = 0, render_mode='human')
-    #env_eval = gymnasium.make(config['domain']['name'], render_mode='human')
 
     num_agents = 1
     num_actions = env.action_space.shape[0] #agent_size_modifier
