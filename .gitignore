@@ -3,3 +3,4 @@ __pypache__/*
 *.pyc
 notes
 multiagent_mujoco
+.vscode
