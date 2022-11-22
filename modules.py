@@ -34,6 +34,7 @@ class critic(torch.nn.Module):
         output = (self.linear3(output))
         return output
 
+
 class twin_critic(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size, bias=False, device='cpu'):
         super().__init__()
