@@ -19,6 +19,29 @@ from TD3 import *
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+# Runs policy for X episodes and returns return reward
+# A fixed seed is used for the eval environment
+def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10):
+    eval_env = gymnasium.make(env_name)
+
+    total_return = 0.
+    for i in range(eval_episodes):
+        if i == 0:
+            state, _ = eval_env.reset(seed=seed)
+        else:
+            state, _ = eval_env.reset()
+        terminated, truncated = 0, 0
+        while not (terminated or truncated):
+            action = model.query_actor(torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE), add_noise=False)
+            state, reward, terminated, truncated, _ = eval_env.step(action.tolist())
+            total_return += reward
+
+    total_return /= eval_episodes
+
+    # print(f"Evaluation over {eval_episodes} episodes: {total_return:.3f}")
+    return total_return
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default='config.yaml')
@@ -68,22 +91,14 @@ if __name__ == "__main__":
             if is_terminal or is_truncated:
                 cur_state = torch.tensor(env.reset()[0], dtype=torch.float32, device=TORCH_DEVICE)
 
-            if steps % config['domain']['evaluation_frequency'] == 0 and steps >= config['domain']['init_learn_timestep']:#evaluate episode
-                cur_state = torch.tensor(env_eval.reset(seed=None, options=None)[0], dtype=torch.float32, device=TORCH_DEVICE)
-                total_evalution_return = 0
-                for _ in range(env_eval.spec.max_episode_steps):
-                    actions = model.query_actor(cur_state, add_noise=False)
-                    new_state, reward, is_terminal, is_truncated, info = env_eval.step(actions.tolist())
-                    cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
-                    total_evalution_return += reward
-
-                    if is_terminal:
-                        break
+            if steps % config['domain']['evaluation_frequency'] == 0 and steps >= config['domain']['init_learn_timestep']:  # evaluate episode
+                total_evalution_return = eval_policy(config['domain']['name'])
                 print('Run: ' + str(run) + ' Training Step: ' + str(steps) + ' return: ' + str(total_evalution_return))
                 eval_file.write(str(total_evalution_return) + '\n')
                 if (eval_max_return < total_evalution_return):
                     eval_max_return = total_evalution_return
                     best_model = copy.deepcopy(model)
+
         print('Run: ' + str(run) + ' Max return: ' + str(eval_max_return))
         print('Finished score can be found at: ' + eval_path + '/score' + str(run) + '.csv')
         best_model.save(eval_path + '/' + 'best_run' + str(run))
