@@ -63,7 +63,7 @@ class TD3_model():
 
         if (++self.total_step_iterations % self.policy_update_frequency) == 0:
             # update actor
-            policy_loss = (-self.critics(old_state_batch, self.actor(old_state_batch))[0]).mean()
+            policy_loss = (-self.critics.critic_0(old_state_batch, self.actor(old_state_batch))).mean()
 
             self.actor_optimizer.zero_grad()
             policy_loss.backward()
