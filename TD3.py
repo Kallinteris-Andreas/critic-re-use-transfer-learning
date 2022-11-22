@@ -6,6 +6,8 @@ import pickle
 from ERB import *
 from modules import *
 
+TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 class TD3_model():
     def __init__(self, num_actions, num_states, min_action, max_action, yaml_config):
         assert num_actions > 0 and num_states > 0 and min_action < max_action
@@ -21,11 +23,11 @@ class TD3_model():
         self.noise_policy_standard_deviation = yaml_config['TD3']['sigma_policy']
         self.noise_policy_clip = yaml_config['TD3']['noise_policy_clip']
         self.policy_update_frequency = yaml_config['TD3']['d']
-        
+
         self.actor = actor(num_actions, num_states, max_action, yaml_config['TD3']['mu_bias'], device=TORCH_DEVICE) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), yaml_config['TD3']['optimizer_gamma'])
-        self.critics= twin_critic(num_actions, num_states, yaml_config['TD3']['q_bias'], device=TORCH_DEVICE) # q0-1
+        self.critics = twin_critic(num_actions, num_states, yaml_config['TD3']['q_bias'], device=TORCH_DEVICE) # q0-1
         self.target_critics = copy.deepcopy(self.critics) # q0-1'
         self.critics_optimizer = torch.optim.Adam(self.critics.parameters(), yaml_config['TD3']['optimizer_gamma'])
 
