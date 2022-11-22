@@ -1,6 +1,5 @@
 import torch
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class actor(torch.nn.Module):
     def __init__(self, action_space_size, observation_state_size, max_action=1, bias=True, device='cpu'):
@@ -30,7 +29,7 @@ class critic(torch.nn.Module):
 
     def forward(self, observations, actions):
         assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
-        output = torch.relu(self.linear1(torch.cat((observations, actions), dim = 1)))
+        output = torch.relu(self.linear1(torch.cat((observations, actions), dim=1)))
         output = torch.relu(self.linear2(output))
         output = (self.linear3(output))
         return output
