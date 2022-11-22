@@ -1,12 +1,11 @@
 import torch
-import yaml
 import copy
-import random
 import pickle
 from ERB import *
 from modules import *
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 class TD3_model():
     def __init__(self, num_actions, num_states, min_action, max_action, yaml_config):
@@ -35,10 +34,9 @@ class TD3_model():
 
     def query_actor(self, state, add_noise=True):
         if add_noise:
-            return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=TORCH_DEVICE)*self.noise_exploration_standard_deviation, min = self.min_action, max = self.max_action)
+            return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=TORCH_DEVICE) * self.noise_exploration_standard_deviation, min=self.min_action, max=self.max_action)
         else:
             return self.actor(state)
-
 
     def train_model_step(self):
         if len(self.erb.buffer) < self.mini_batch_size:
@@ -46,17 +44,16 @@ class TD3_model():
 
         old_state_batch, actions_batch, reward_batch, new_state_batch, terminal_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
 
-
-        #update critic
+        # update critic
         with torch.no_grad():
-            #select target action
-            target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE)*self.noise_policy_standard_deviation).clamp(min= -self.noise_policy_clip, max=self.noise_policy_clip)
-            target_actions_batch = torch.clamp(self.target_actor(new_state_batch) + target_policy_noise, min = self.min_action, max = self.max_action)
-            #compute y
+            # select target action
+            target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
+            target_actions_batch = torch.clamp(self.target_actor(new_state_batch) + target_policy_noise, min=self.min_action, max=self.max_action)
+            # compute y
             qt0, qt1 = self.target_critics(new_state_batch, target_actions_batch)
             y = reward_batch + ~terminal_batch * self.discount_rate * torch.min(qt0, qt1)
 
-        #compute critic losses
+        # compute critic losses
         q0, q1 = self.critics(old_state_batch, actions_batch)
         critics_loss = torch.nn.functional.mse_loss(q0, y) + torch.nn.functional.mse_loss(q1, y)
 
@@ -65,17 +62,16 @@ class TD3_model():
         self.critics_optimizer.step()
 
         if (++self.total_step_iterations % self.policy_update_frequency) == 0:
-            #update actor
+            # update actor
             policy_loss = (-self.critics(old_state_batch, self.actor(old_state_batch))[0]).mean()
 
             self.actor_optimizer.zero_grad()
             policy_loss.backward()
             self.actor_optimizer.step()
 
-            #update target networks
+            # update target networks
             soft_update_target_network(self.target_actor, self.actor, self.target_update_rate)
             soft_update_target_network(self.target_critics, self.critics, self.target_update_rate)
-
 
     def save(self, filename):
         torch.save(self.critics.state_dict(), filename + "_critic")
@@ -83,10 +79,8 @@ class TD3_model():
 
         torch.save(self.actor.state_dict(), filename + "_actor")
         torch.save(self.actor_optimizer.state_dict(), filename + "_actor_optimizer")
-        
-        with open(filename + '_erb', 'wb') as outp:
-            pickle.dump(self.erb, outp, pickle.HIGHEST_PROTOCOL)
 
+        pickle.dump(self.erb.buffer, open(filename + '_erb', 'wb'))
 
     def load(self, filename):
         self.critics.load_state_dict(torch.load(filename + "_critic"))
