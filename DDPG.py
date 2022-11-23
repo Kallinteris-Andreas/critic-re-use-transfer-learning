@@ -4,7 +4,7 @@ import copy
 from ERB import *
 from modules import *
 
-class DDPG_model():
+class model():
     def __init__(self, num_actions, num_states, min_action, max_action, yaml_config):
         assert num_actions > 0 and num_states > 0 and min_action < max_action
         self.num_actions = num_actions
@@ -30,7 +30,6 @@ class DDPG_model():
             return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=TORCH_DEVICE)*self.noise_standard_deviation, min = self.min_action, max = self.max_action)
         else:
             return self.actor(state)
-
 
     def train_model_step(self):
         if len(self.erb.buffer) < self.mini_batch_size:

@@ -7,7 +7,7 @@ from modules import *
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-class TD3_model():
+class model():
     def __init__(self, num_actions, num_states, min_action, max_action, yaml_config):
         assert num_actions > 0 and num_states > 0 and min_action < max_action
         self.num_actions = num_actions

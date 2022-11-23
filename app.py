@@ -10,10 +10,10 @@ import sys
 import math
 import argparse
 import icecream
-from ERB import *
-from modules import *
-from DDPG import *
-from TD3 import *
+import DDPG
+import TD3
+#from DDPG import *
+#from TD3 import *
 #from multiagent_mujoco.mujoco_multi import MujocoMulti #https://github.com/schroederdewitt/multiagent_mujoco
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -24,7 +24,7 @@ TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10):
     eval_env = gymnasium.make(env_name)
 
-    total_return = 0.
+    total_return = 0
     for i in range(eval_episodes):
         if i == 0:
             state, _ = eval_env.reset(seed=seed)
@@ -39,6 +39,16 @@ def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10):
     return total_return / eval_episodes
 
 
+def generate_model(model_name: str):
+    match model_name:
+        case 'DDPG':
+            return DDPG.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], yaml_config=config)
+        case 'TD3':
+            return TD3.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], yaml_config=config)
+        case _:
+            assert False, 'invalid learning algorithm'
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default='config.yaml')
@@ -51,19 +61,13 @@ if __name__ == "__main__":
     num_actions = env.action_space.shape[0] #agent_size_modifier
     num_states = env.observation_space.shape[0] #len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
 
-    # create evaluate file
-    eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['name'] + '_' + str(time.time()) 
+    # create evaluate directory
+    eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['name'] + '_' + str(time.time())
     os.makedirs(eval_path)
     shutil.copyfile(args.config, eval_path + '/config.yaml')
 
     for run in range(config['domain']['runs']):
-        match config['domain']['algo']:
-            case 'DDPG':
-                model = DDPG_model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], yaml_config=config)
-            case 'TD3':
-                model = TD3_model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], yaml_config=config)
-            case _:
-                assert False, 'invalid learning algorithm'
+        model = generate_model(config['domain']['algo'])
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
