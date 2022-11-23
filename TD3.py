@@ -1,8 +1,8 @@
 import torch
 import copy
 import pickle
-from ERB import *
-from modules import *
+import ERB
+import modules
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -23,14 +23,14 @@ class model():
         self.noise_policy_clip = yaml_config['TD3']['noise_policy_clip']
         self.policy_update_frequency = yaml_config['TD3']['d']
 
-        self.actor = actor(num_actions, num_states, max_action, yaml_config['TD3']['mu_bias'], device=TORCH_DEVICE)  # mu
-        self.target_actor = copy.deepcopy(self.actor) # mu'
+        self.actor = modules.actor(num_actions, num_states, max_action, yaml_config['TD3']['mu_bias'], device=TORCH_DEVICE)  # mu
+        self.target_actor = copy.deepcopy(self.actor)  # mu'
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), yaml_config['TD3']['optimizer_gamma'])
-        self.critics = twin_critic(num_actions, num_states, yaml_config['TD3']['q_bias'], device=TORCH_DEVICE)  # q0-1
-        self.target_critics = copy.deepcopy(self.critics) # q0-1'
+        self.critics = modules.twin_critic(num_actions, num_states, yaml_config['TD3']['q_bias'], device=TORCH_DEVICE)  # q0-1
+        self.target_critics = copy.deepcopy(self.critics)  # q0-1'
         self.critics_optimizer = torch.optim.Adam(self.critics.parameters(), yaml_config['TD3']['optimizer_gamma'])
 
-        self.erb = experience_replay_buffer(yaml_config['TD3']['experience_replay_buffer_size'])
+        self.erb = ERB.experience_replay_buffer(yaml_config['TD3']['experience_replay_buffer_size'])
 
     def query_actor(self, state, add_noise=True):
         if add_noise:
@@ -70,8 +70,8 @@ class model():
             self.actor_optimizer.step()
 
             # update target networks
-            soft_update_target_network(self.target_actor, self.actor, self.target_update_rate)
-            soft_update_target_network(self.target_critics, self.critics, self.target_update_rate)
+            modules.soft_update_target_network(self.target_actor, self.actor, self.target_update_rate)
+            modules.soft_update_target_network(self.target_critics, self.critics, self.target_update_rate)
 
     def save(self, filename):
         torch.save(self.critics.state_dict(), filename + "_critic")
