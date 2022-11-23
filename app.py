@@ -12,9 +12,6 @@ import argparse
 import icecream
 import DDPG
 import TD3
-#from DDPG import *
-#from TD3 import *
-#from multiagent_mujoco.mujoco_multi import MujocoMulti #https://github.com/schroederdewitt/multiagent_mujoco
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -55,6 +52,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
+    # seed all the things
+    torch.manual_seed(config['domain']['seed'])
+
     env = gymnasium.make(config['domain']['name'])
 
     num_agents = 1
@@ -71,7 +71,10 @@ if __name__ == "__main__":
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
-        cur_state = torch.tensor(env.reset()[0], dtype=torch.float32, device=TORCH_DEVICE)
+        if run == 0:
+            cur_state = torch.tensor(env.reset(config['domain']['seed'])[0], dtype=torch.float32, device=TORCH_DEVICE)
+        else:
+            cur_state = torch.tensor(env.reset()[0], dtype=torch.float32, device=TORCH_DEVICE)
         for steps in range(config['domain']['total_timesteps']):
             if steps >= config['domain']['init_learn_timestep']:
                 actions = model.query_actor(cur_state)
