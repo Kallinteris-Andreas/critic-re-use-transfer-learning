@@ -7,33 +7,33 @@ from modules import *
 
 
 class model():
-    def __init__(self, num_actions, num_states, min_action, max_action, yaml_config):
+    def __init__(self, num_actions: int, num_states: int, min_action: float, max_action: float, config: dict):
         assert num_actions > 0 and num_states > 0 and min_action < max_action
         self.num_actions = num_actions
         self.min_action = min_action
         self.max_action = max_action
 
-        self.discount_rate = yaml_config['DDPG']['gamma']
-        self.target_update_rate = yaml_config['DDPG']['tau']
-        self.mini_batch_size = yaml_config['DDPG']['N']
-        self.noise_standard_deviation = yaml_config['DDPG']['sigma']
+        self.discount_rate = config['DDPG']['gamma']
+        self.target_update_rate = config['DDPG']['tau']
+        self.mini_batch_size = config['DDPG']['N']
+        self.noise_standard_deviation = config['DDPG']['sigma']
 
-        self.actor = actor(num_actions, num_states, max_action, yaml_config['TD3']['mu_bias'], device=TORCH_DEVICE) # mu
+        self.actor = actor(num_actions, num_states, max_action, config['TD3']['mu_bias'], device=TORCH_DEVICE) # mu
         self.target_actor = copy.deepcopy(self.actor) # mu'
-        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), yaml_config['DDPG']['optimizer_gamma'])
-        self.critic = critic(num_actions, num_states, yaml_config['TD3']['q_bias'], device=TORCH_DEVICE) # q
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), config['DDPG']['optimizer_gamma'])
+        self.critic = critic(num_actions, num_states, config['TD3']['q_bias'], device=TORCH_DEVICE) # q
         self.target_critic = copy.deepcopy(self.critic) # q'
-        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), yaml_config['DDPG']['optimizer_gamma'])
+        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), config['DDPG']['optimizer_gamma'])
 
-        self.erb = experience_replay_buffer(yaml_config['DDPG']['experience_replay_buffer_size'])
+        self.erb = experience_replay_buffer(config['DDPG']['experience_replay_buffer_size'])
 
-    def query_actor(self, state, add_noise=True):
+    def query_actor(self, state: torch.Tensor, add_noise: bool = True) -> torch.Tensor:
         if add_noise:
             return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=TORCH_DEVICE)*self.noise_standard_deviation, min = self.min_action, max = self.max_action)
         else:
             return self.actor(state)
 
-    def train_model_step(self):
+    def train_model_step(self) -> None:
         if len(self.erb.buffer) < self.mini_batch_size:
             return
 

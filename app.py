@@ -18,7 +18,7 @@ TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Runs policy for X episodes and returns return reward
 # A fixed seed is used for the eval environment
-def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10):
+def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10) -> float:
     eval_env = gymnasium.make(env_name)
 
     total_return = 0

@@ -2,7 +2,7 @@ import torch
 
 
 class actor(torch.nn.Module):
-    def __init__(self, action_space_size, observation_state_size, max_action=1, bias=True, device='cpu'):
+    def __init__(self, action_space_size: int, observation_state_size: int, max_action: float = 1, bias: bool = True, device: str = 'cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
         self.linear1 = torch.nn.Linear(observation_state_size, 256, bias=bias, device=device)
@@ -10,7 +10,7 @@ class actor(torch.nn.Module):
         self.linear3 = torch.nn.Linear(256, action_space_size, bias=bias, device=device)
         self.max_action = max_action
 
-    def forward(self, observations):
+    def forward(self, observations: torch.Tensor) -> torch.Tensor:
         assert isinstance(observations, torch.Tensor)
         output = torch.relu(self.linear1(observations))
         output = torch.relu(self.linear2(output))
@@ -20,14 +20,14 @@ class actor(torch.nn.Module):
 
 
 class critic(torch.nn.Module):
-    def __init__(self, action_space_size, observation_state_size, bias=False, device='cpu'):
+    def __init__(self, action_space_size: int, observation_state_size: int, bias: bool = False, device: str = 'cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
         self.linear1 = torch.nn.Linear(action_space_size + observation_state_size, 256, bias=bias, device=device)
         self.linear2 = torch.nn.Linear(256, 256, bias=bias, device=device)
         self.linear3 = torch.nn.Linear(256, 1, bias=bias, device=device)
 
-    def forward(self, observations, actions):
+    def forward(self, observations: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
         assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
         output = torch.relu(self.linear1(torch.cat((observations, actions), dim=1)))
         output = torch.relu(self.linear2(output))
@@ -36,13 +36,13 @@ class critic(torch.nn.Module):
 
 
 class twin_critic(torch.nn.Module):
-    def __init__(self, action_space_size, observation_state_size, bias=False, device='cpu'):
+    def __init__(self, action_space_size: int, observation_state_size: int, bias: bool = False, device: str = 'cpu'):
         super().__init__()
         assert action_space_size > 0 and observation_state_size > 0
         self.critic_0 = critic(action_space_size, observation_state_size, bias, device)
         self.critic_1 = critic(action_space_size, observation_state_size, bias, device)
 
-    def forward(self, observations, actions):
+    def forward(self, observations: torch.Tensor, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
         output_0 = self.critic_0(observations, actions)
         output_1 = self.critic_1(observations, actions)
@@ -50,7 +50,7 @@ class twin_critic(torch.nn.Module):
 
 
 # source: https://github.com/ghliu/pytorch-ddpg/blob/master/util.py
-def soft_update_target_network(target, source, tau):
+def soft_update_target_network(target: torch.nn.Module, source: torch.nn.Module, tau: float) -> None:
     assert tau >= 0 and tau <= 1
     assert isinstance(target, torch.nn.Module) and isinstance(source, torch.nn.Module)
     for target_param, param in zip(target.parameters(), source.parameters()):

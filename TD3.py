@@ -8,37 +8,37 @@ TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class model():
-    def __init__(self, num_actions, num_states, min_action, max_action, yaml_config):
+    def __init__(self, num_actions: int, num_states: int, min_action: float, max_action: float, config: dict):
         assert num_actions > 0 and num_states > 0 and min_action < max_action
         self.num_actions = num_actions
         self.min_action = min_action
         self.max_action = max_action
         self.total_step_iterations = 0
 
-        self.discount_rate = yaml_config['TD3']['gamma']
-        self.target_update_rate = yaml_config['TD3']['tau']
-        self.mini_batch_size = yaml_config['TD3']['N']
-        self.noise_exploration_standard_deviation = yaml_config['TD3']['sigma_explore']
-        self.noise_policy_standard_deviation = yaml_config['TD3']['sigma_policy']
-        self.noise_policy_clip = yaml_config['TD3']['noise_policy_clip']
-        self.policy_update_frequency = yaml_config['TD3']['d']
+        self.discount_rate = config['TD3']['gamma']
+        self.target_update_rate = config['TD3']['tau']
+        self.mini_batch_size = config['TD3']['N']
+        self.noise_exploration_standard_deviation = config['TD3']['sigma_explore']
+        self.noise_policy_standard_deviation = config['TD3']['sigma_policy']
+        self.noise_policy_clip = config['TD3']['noise_policy_clip']
+        self.policy_update_frequency = config['TD3']['d']
 
-        self.actor = modules.actor(num_actions, num_states, max_action, yaml_config['TD3']['mu_bias'], device=TORCH_DEVICE)  # mu
+        self.actor = modules.actor(num_actions, num_states, max_action, config['TD3']['mu_bias'], device=TORCH_DEVICE)  # mu
         self.target_actor = copy.deepcopy(self.actor)  # mu'
-        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), yaml_config['TD3']['optimizer_gamma'])
-        self.critics = modules.twin_critic(num_actions, num_states, yaml_config['TD3']['q_bias'], device=TORCH_DEVICE)  # q0-1
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), config['TD3']['optimizer_gamma'])
+        self.critics = modules.twin_critic(num_actions, num_states, config['TD3']['q_bias'], device=TORCH_DEVICE)  # q0-1
         self.target_critics = copy.deepcopy(self.critics)  # q0-1'
-        self.critics_optimizer = torch.optim.Adam(self.critics.parameters(), yaml_config['TD3']['optimizer_gamma'])
+        self.critics_optimizer = torch.optim.Adam(self.critics.parameters(), config['TD3']['optimizer_gamma'])
 
-        self.erb = ERB.experience_replay_buffer(yaml_config['TD3']['experience_replay_buffer_size'])
+        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'])
 
-    def query_actor(self, state, add_noise=True):
+    def query_actor(self, state: torch.Tensor, add_noise: bool = True) -> torch.Tensor:
         if add_noise:
             return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=TORCH_DEVICE) * self.noise_exploration_standard_deviation, min=self.min_action, max=self.max_action)
         else:
             return self.actor(state)
 
-    def train_model_step(self):
+    def train_model_step(self) -> None:
         if len(self.erb.buffer) < self.mini_batch_size:
             return
 
@@ -73,7 +73,7 @@ class model():
             modules.soft_update_target_network(self.target_actor, self.actor, self.target_update_rate)
             modules.soft_update_target_network(self.target_critics, self.critics, self.target_update_rate)
 
-    def save(self, filename):
+    def save(self, filename: str) -> None:
         torch.save(self.critics.state_dict(), filename + "_critic")
         torch.save(self.critics_optimizer.state_dict(), filename + "_critic_optimizer")
 
@@ -82,7 +82,7 @@ class model():
 
         pickle.dump(self.erb, open(filename + '_erb', 'wb'))
 
-    def load(self, filename):
+    def load(self, filename: str) -> None:
         self.critics.load_state_dict(torch.load(filename + "_critic"))
         self.critics_optimizer.load_state_dict(torch.load(filename + "_critic_optimizer"))
         self.critics_target = copy.deepcopy(self.critic)
