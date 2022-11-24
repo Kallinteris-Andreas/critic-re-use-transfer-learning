@@ -72,7 +72,7 @@ if __name__ == "__main__":
             cur_state = torch.tensor(env.reset()[0], dtype=torch.float32, device=TORCH_DEVICE)
         for steps in range(config['domain']['total_timesteps']):
             if steps >= config['domain']['init_learn_timestep']:
-                actions = model.query_actor(cur_state)
+                actions = model.query_actor(cur_state, add_noise=True)
             else:
                 actions = torch.tensor(env.action_space.sample(), dtype=torch.float32, device=TORCH_DEVICE)
 
