@@ -5,19 +5,17 @@ import torch
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 experience_replay = collections.namedtuple('experience_replay', 'old_state, actions, reward, new_state, is_terminal')
-#note: actions, old_state, new_state are torch.Tensor reward is float32 scalar, terminal is bool
-agent_spaces = collections.namedtuple('agent_def', 'observation_space, action_space')
+# note: actions, old_state, new_state are torch.Tensor, reward is float32 scalar, terminal is bool
+agent_spaces = collections.namedtuple('agent_spaces', 'observation_space, action_space')
 
-#TODO store rewards and is_terminal as torch.Tensor
+# TODO store rewards and is_terminal as torch.Tensor
 
 
 class experience_replay_buffer():
-    def __init__(self, max_size):
+    def __init__(self, max_size: int):
         self.buffer = collections.deque(maxlen=max_size)
 
     def add_experience(self, old_state: torch.Tensor, actions: torch.Tensor, reward: float, new_state: torch.Tensor, is_terminal: bool) -> None:
-        #if len(self.buffer) == self.buffer.maxlen-1:
-            #print("filled the ERB")
         self.buffer.append(experience_replay(old_state, actions, reward, new_state, is_terminal))
 
     def sample_batch(self, batch_size: int) -> list[experience_replay]:
