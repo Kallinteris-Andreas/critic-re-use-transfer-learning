@@ -21,10 +21,7 @@ def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10) -> floa
 
     total_return = 0
     for i in range(eval_episodes):
-        if i == 0:
-            state, _ = eval_env.reset(seed=seed)
-        else:
-            state, _ = eval_env.reset()
+        state, _ = eval_env.reset(seed=seed + i)
         terminated, truncated = 0, 0
         while not (terminated or truncated):
             action = model.query_actor(torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE), add_noise=False)
