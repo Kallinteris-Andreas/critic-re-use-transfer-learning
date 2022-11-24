@@ -1,9 +1,10 @@
 import torch
-import yaml
 import copy
 import pickle
-from ERB import *
-from modules import *
+import ERB
+import modules
+
+TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class model():
@@ -18,18 +19,18 @@ class model():
         self.mini_batch_size = config['DDPG']['N']
         self.noise_standard_deviation = config['DDPG']['sigma']
 
-        self.actor = actor(num_actions, num_states, max_action, config['TD3']['mu_bias'], device=TORCH_DEVICE) # mu
-        self.target_actor = copy.deepcopy(self.actor) # mu'
+        self.actor = modules.actor(num_actions, num_states, max_action, config['TD3']['mu_bias'], device=TORCH_DEVICE)  # mu
+        self.target_actor = copy.deepcopy(self.actor)  # mu'
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), config['DDPG']['optimizer_gamma'])
-        self.critic = critic(num_actions, num_states, config['TD3']['q_bias'], device=TORCH_DEVICE) # q
-        self.target_critic = copy.deepcopy(self.critic) # q'
+        self.critic = modules.critic(num_actions, num_states, config['TD3']['q_bias'], device=TORCH_DEVICE)  # q
+        self.target_critic = copy.deepcopy(self.critic)  # q'
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), config['DDPG']['optimizer_gamma'])
 
-        self.erb = experience_replay_buffer(config['DDPG']['experience_replay_buffer_size'])
+        self.erb = ERB.experience_replay_buffer(config['DDPG']['experience_replay_buffer_size'])
 
     def query_actor(self, state: torch.Tensor, add_noise: bool = True) -> torch.Tensor:
         if add_noise:
-            return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=TORCH_DEVICE)*self.noise_standard_deviation, min = self.min_action, max = self.max_action)
+            return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=TORCH_DEVICE) * self.noise_standard_deviation, min=self.min_action, max=self.max_action)
         else:
             return self.actor(state)
 
@@ -54,8 +55,8 @@ class model():
         self.actor_optimizer.step()
 
         # update target networks
-        soft_update_target_network(self.target_actor, self.actor, self.target_update_rate)
-        soft_update_target_network(self.target_critic, self.critic, self.target_update_rate)
+        modules.soft_update_target_network(self.target_actor, self.actor, self.target_update_rate)
+        modules.soft_update_target_network(self.target_critic, self.critic, self.target_update_rate)
 
     def save(self, filename: str) -> None:
         torch.save(self.critic.state_dict(), filename + "_critic")
