@@ -1,8 +1,10 @@
 import torch
 import yaml
 import copy
+import pickle
 from ERB import *
 from modules import *
+
 
 class model():
     def __init__(self, num_actions, num_states, min_action, max_action, yaml_config):
@@ -54,3 +56,23 @@ class model():
         # update target networks
         soft_update_target_network(self.target_actor, self.actor, self.target_update_rate)
         soft_update_target_network(self.target_critic, self.critic, self.target_update_rate)
+
+    def save(self, filename: str) -> None:
+        torch.save(self.critic.state_dict(), filename + "_critic")
+        torch.save(self.critic_optimizer.state_dict(), filename + "_critic_optimizer")
+
+        torch.save(self.actor.state_dict(), filename + "_actor")
+        torch.save(self.actor_optimizer.state_dict(), filename + "_actor_optimizer")
+
+        pickle.dump(self.erb, open(filename + '_erb', 'wb'))
+
+    def load(self, filename: str) -> None:
+        self.critic.load_state_dict(torch.load(filename + "_critic"))
+        self.critic_optimizer.load_state_dict(torch.load(filename + "_critic_optimizer"))
+        self.critics_target = copy.deepcopy(self.critic)
+
+        self.actor.load_state_dict(torch.load(filename + "_actor"))
+        self.actor_optimizer.load_state_dict(torch.load(filename + "_actor_optimizer"))
+        self.actor_target = copy.deepcopy(self.actor)
+
+        self.erb = pickle.load(open(filename + '_erb', 'wb'))
