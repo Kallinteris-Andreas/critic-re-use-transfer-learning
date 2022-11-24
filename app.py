@@ -1,4 +1,3 @@
-import numpy
 import torch
 import gymnasium
 import copy
@@ -6,7 +5,6 @@ import time
 import yaml
 import os
 import shutil
-import sys
 import math
 import argparse
 import icecream
@@ -39,9 +37,9 @@ def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10) -> floa
 def generate_model(model_name: str):
     match model_name:
         case 'DDPG':
-            return DDPG.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], yaml_config=config)
+            return DDPG.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], config=config)
         case 'TD3':
-            return TD3.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], yaml_config=config)
+            return TD3.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], config=config)
         case _:
             assert False, 'invalid learning algorithm'
 
@@ -58,8 +56,8 @@ if __name__ == "__main__":
     env = gymnasium.make(config['domain']['name'])
 
     num_agents = 1
-    num_actions = env.action_space.shape[0] #agent_size_modifier
-    num_states = env.observation_space.shape[0] #len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
+    num_actions = env.action_space.shape[0]  # agent_size_modifier
+    num_states = env.observation_space.shape[0]  # len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
 
     # create evaluate directory
     eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['name'] + '_' + str(time.time())
@@ -82,9 +80,9 @@ if __name__ == "__main__":
                 actions = torch.tensor(env.action_space.sample(), dtype=torch.float32, device=TORCH_DEVICE)
 
             new_state, reward, is_terminal, is_truncated, info = env.step(actions.tolist())
-            #print('step: ' + str(step) + ' state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
+            # print('step: ' + str(step) + ' state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
 
-            model.erb.add_experience(old_state=cur_state, actions=actions.detach(), reward=reward, new_state=torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal = is_terminal)
+            model.erb.add_experience(old_state=cur_state, actions=actions.detach(), reward=reward, new_state=torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal=is_terminal)
             cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
 
             if steps >= config['domain']['init_learn_timestep']:
