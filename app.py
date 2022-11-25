@@ -20,7 +20,7 @@ def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10) -> floa
 
     total_return = 0
     for i in range(eval_episodes):
-        state = eval_env.reset(seed=seed + i)
+        state = eval_env.reset(seed=seed + i)[0]
         terminated, truncated = 0, 0
         while not (terminated or truncated):
             action = model.query_actor(torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE), add_noise=False)
@@ -76,7 +76,6 @@ if __name__ == "__main__":
                 actions = torch.tensor(env.action_space.sample(), dtype=torch.float32, device=TORCH_DEVICE)
 
             new_state, reward, is_terminal, is_truncated, info = env.step(actions.tolist())
-            # print('step: ' + str(step) + ' state: ' + str(cur_state.tolist()) + ' actions: ' + str(actions.tolist()) + ' reward: ' + str(reward))#this is a debug line
 
             model.erb.add_experience(old_state=cur_state, actions=actions.detach(), reward=reward, new_state=torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal=is_terminal)
             cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
