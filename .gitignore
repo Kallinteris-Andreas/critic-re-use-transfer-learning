@@ -1,4 +1,6 @@
 results/*
+old_res/*
+good_res/*
 __pypache__/*
 *.pyc
 notes
