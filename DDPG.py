@@ -65,7 +65,7 @@ class model():
         torch.save(self.actor.state_dict(), filename + "_actor")
         torch.save(self.actor_optimizer.state_dict(), filename + "_actor_optimizer")
 
-        pickle.dump(self.erb, open(filename + '_erb', 'wb'))
+        # pickle.dump(self.erb, open(filename + '_erb', 'wb'))
 
     def load(self, filename: str) -> None:
         self.critic.load_state_dict(torch.load(filename + "_critic"))
