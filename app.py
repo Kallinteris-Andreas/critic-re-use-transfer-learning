@@ -65,10 +65,7 @@ if __name__ == "__main__":
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
-        if run == 0:
-            cur_state = torch.tensor(env.reset(seed=config['domain']['seed'])[0], dtype=torch.float32, device=TORCH_DEVICE)
-        else:
-            cur_state = torch.tensor(env.reset()[0], dtype=torch.float32, device=TORCH_DEVICE)
+        cur_state = torch.tensor(env.reset(seed=config['domain']['seed'])[0] + run, dtype=torch.float32, device=TORCH_DEVICE)
         for steps in range(config['domain']['total_timesteps']):
             if steps >= config['domain']['init_learn_timestep']:
                 actions = model.query_actor(cur_state, add_noise=True)
