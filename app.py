@@ -46,9 +46,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
-    # seed all the things
-    torch.manual_seed(config['domain']['seed'])
-
     env = gymnasium.make(config['domain']['name'])
 
     num_agents = 1
@@ -59,6 +56,10 @@ if __name__ == "__main__":
     eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['name'] + '_' + str(time.time())
     os.makedirs(eval_path)
     shutil.copyfile(args.config, eval_path + '/config.yaml')
+
+    # seed all the things
+    torch.manual_seed(config['domain']['seed'])
+    env.action_space.seed(config['domain']['seed'])
 
     for run in range(config['domain']['runs']):
         model = generate_model(config['domain']['algo'])
