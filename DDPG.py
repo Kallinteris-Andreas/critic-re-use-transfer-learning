@@ -76,4 +76,4 @@ class model():
         self.actor_optimizer.load_state_dict(torch.load(filename + "_actor_optimizer"))
         self.actor_target = copy.deepcopy(self.actor)
 
-        self.erb = pickle.load(open(filename + '_erb', 'wb'))
+        self.erb = pickle.load(open(filename + '_erb', 'rb'))
