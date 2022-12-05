@@ -9,7 +9,7 @@ domain:
   runs: 10 # number of statistical runs
   seed: 64 # seeds the enviroment
 DDPG:
-  gamma: 0.99999 # Reward Discount rate
+  gamma: 0.99 # Reward Discount rate
   #gamma: 1
   tau: 0.01 # Target Network Update rate
   N: 100 # Experience Replay Buffer's mini match size
@@ -19,7 +19,7 @@ DDPG:
   mu_bias: True # Bias for the actor module
   q_bias: True # Bias for the critic module
 TD3:
-  gamma: 0.99999 # Reward Discount rate
+  gamma: 0.99 # Reward Discount rate
   #gamma: 1
   tau: 0.005 # Target Network Update rate
   N: 256 # Experience Replay Buffer's mini match size
