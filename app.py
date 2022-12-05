@@ -1,6 +1,7 @@
 import torch
 import gymnasium
 import copy
+import pickle
 import time
 import yaml
 import os
@@ -95,3 +96,4 @@ if __name__ == "__main__":
         print('Run: ' + str(run) + ' Max return: ' + str(eval_max_return))
         print('Finished score can be found at: ' + eval_path + '/score' + str(run) + '.csv')
         best_model.save(eval_path + '/' + 'best_run' + str(run))
+        pickle.dump(model.erb, open(eval_path + '/' + 'best_run' + str(run) + '_erb', 'wb'))
