@@ -44,6 +44,7 @@ def generate_model(model_name: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default='config.yaml')
+    parser.add_argument("--starting_run", default=0)
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     torch.manual_seed(config['domain']['seed'])
     env.action_space.seed(config['domain']['seed'])
 
-    for run in range(config['domain']['runs']):
+    for run in range(args.starting_run, config['domain']['runs']):
         model = generate_model(config['domain']['algo'])
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
