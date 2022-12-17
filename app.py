@@ -44,7 +44,7 @@ def generate_model(model_name: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default='config.yaml')
-    parser.add_argument("--starting_run", default=0)
+    parser.add_argument("--starting_run", default=0, type=int)
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
