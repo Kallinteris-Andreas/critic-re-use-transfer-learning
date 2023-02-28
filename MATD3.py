@@ -84,7 +84,6 @@ class model():
         return [[part.act_ids for part in partion] for partion in zoo_env.agent_action_partitions]
 
     def train_model_step(self, zoo_env) -> None:
-        self.mini_batch_size = 3
         if len(self.erb.buffer) < self.mini_batch_size:
             return
 
