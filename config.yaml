@@ -1,8 +1,10 @@
 domain:
-  name: Hopper-v4
-  total_timesteps: 2000000 # how many learn steps the agent should take
+  name: Ant
+  factorization: 2x4 # agent factorization used, check MaMuJoCo Doc for more info
+  obsk: 1
+  total_timesteps: 1_000_000 # how many learn steps the agent should take
   #episodes: 1000
-  algo: TD3 # Valid values: 'DDPG', 'TD3'
+  algo: MATD3 # Valid values: 'DDPG', 'TD3', 'MADDPG'
   init_learn_timestep: 25001 # at which timestep should the agent start learning
   #learning_starts_ep: 10 # Start Learning at episode X, before that fill the ERB with random actions
   evaluation_frequency: 5000 # how ofter should
@@ -20,7 +22,6 @@ DDPG:
   q_bias: True # Bias for the critic module
 TD3:
   gamma: 0.99 # Reward Discount rate
-  #gamma: 1
   tau: 0.005 # Target Network Update rate
   N: 256 # Experience Replay Buffer's mini match size
   experience_replay_buffer_size: 1000000

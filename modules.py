@@ -11,7 +11,7 @@ class actor(torch.nn.Module):
         self.max_action = max_action
 
     def forward(self, observations: torch.Tensor) -> torch.Tensor:
-        assert isinstance(observations, torch.Tensor)
+        # assert isinstance(observations, torch.Tensor)
         output = torch.relu(self.linear1(observations))
         output = torch.relu(self.linear2(output))
         output = torch.tanh(self.linear3(output))
@@ -28,7 +28,7 @@ class critic(torch.nn.Module):
         self.linear3 = torch.nn.Linear(256, 1, bias=bias, device=device)
 
     def forward(self, observations: torch.Tensor, actions: torch.Tensor) -> torch.Tensor:
-        assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
+        # assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
         output = torch.relu(self.linear1(torch.cat((observations, actions), dim=1)))
         output = torch.relu(self.linear2(output))
         output = (self.linear3(output))
@@ -43,7 +43,7 @@ class twin_critic(torch.nn.Module):
         self.critic_1 = critic(action_space_size, observation_state_size, bias, device)
 
     def forward(self, observations: torch.Tensor, actions: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-        assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
+        # assert isinstance(observations, torch.Tensor) and isinstance(actions, torch.Tensor)
         output_0 = self.critic_0(observations, actions)
         output_1 = self.critic_1(observations, actions)
         return output_0, output_1
@@ -52,6 +52,6 @@ class twin_critic(torch.nn.Module):
 # source: https://github.com/ghliu/pytorch-ddpg/blob/master/util.py
 def soft_update_target_network(target: torch.nn.Module, source: torch.nn.Module, tau: float) -> None:
     assert tau >= 0 and tau <= 1
-    assert isinstance(target, torch.nn.Module) and isinstance(source, torch.nn.Module)
+    # assert isinstance(target, torch.nn.Module) and isinstance(source, torch.nn.Module)
     for target_param, param in zip(target.parameters(), source.parameters()):
         target_param.data.copy_(target_param.data * (1.0 - tau) + param.data * tau)
