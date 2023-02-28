@@ -59,11 +59,14 @@ class model():
         return actions
 
     def map_states(self, zoo_env, state_batch: torch.Tensor):
-        state_list = [batch.cpu() for batch in state_batch]
+        # global -> local
+        observations_partions = zoo_env.map_global_state_to_local_observations([t for t in range(zoo_env.single_agent_env.observation_space.shape[0])])
         mapped_states = []
-        for state in state_list:
-            # mapped_states.append(list(zoo_env.map_global_state_to_local_observations(state).values()))
-            mapped_states.append((zoo_env.map_global_state_to_local_observations(state)))
+        for partition in observations_partions.values():
+            out_state = torch.Tensor(self.mini_batch_size, self.num_states_spaces[0])
+            for idx, obs_idx in enumerate(partition):
+                out_state[:, idx] = state_batch[:, int(obs_idx)]
+            mapped_states.append(out_state)
 
         return mapped_states
 
@@ -81,6 +84,7 @@ class model():
         return [[part.act_ids for part in partion] for partion in zoo_env.agent_action_partitions]
 
     def train_model_step(self, zoo_env) -> None:
+        self.mini_batch_size = 3
         if len(self.erb.buffer) < self.mini_batch_size:
             return
 
@@ -88,18 +92,15 @@ class model():
             old_state_batch, actions_batch, reward_batch, new_state_batch, terminal_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
 
             # remap
-            new_state_batch_factored = self.map_states(zoo_env, new_state_batch)
-            new_state_batch_factored_torch = [[torch.Tensor(state) for state in list(t.values())] for t in new_state_batch_factored]
-            old_state_batch_factored = self.map_states(zoo_env, old_state_batch)
-            old_state_batch_factored_torch = [[torch.Tensor(state) for state in list(t.values())] for t in old_state_batch_factored]
-            old_state_batch_local_torch = torch.stack([states[agent_id] for states in old_state_batch_factored_torch])
+            new_state_batch_factored_torch = self.map_states(zoo_env, new_state_batch)
+            old_state_batch_factored_torch = self.map_states(zoo_env, old_state_batch)
 
             # update critic
             with torch.no_grad():
                 # select target action
                 target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
 
-                target_actions_pre = [self.target_actors[agent_id](torch.stack([states[agent_id] for states in new_state_batch_factored_torch])) for agent_id in range(self.num_agents)]
+                target_actions_pre = self.query_actor(new_state_batch_factored_torch, add_noise=False)
                 target_actions = self.map_actions(zoo_env, target_actions_pre)
                 target_actions_batch = torch.clamp(target_actions + target_policy_noise, min=self.min_action, max=self.max_action)
 
@@ -117,7 +118,7 @@ class model():
 
             if (++self.total_step_iterations % self.policy_update_frequency) == 0:
                 # update actor
-                actor_action = self.actors[agent_id](old_state_batch_local_torch)
+                actor_action = self.actors[agent_id](old_state_batch_factored_torch[agent_id])
                 agent_action_partition = self.action_part(zoo_env)[agent_id]
                 # replace actor action
                 new_actions = actions_batch.clone().detach()
