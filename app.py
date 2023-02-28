@@ -50,9 +50,8 @@ if __name__ == "__main__":
 
     env = gymnasium.make(config['domain']['name'])
 
-    num_agents = 1
-    num_actions = env.action_space.shape[0]  # agent_size_modifier
-    num_states = env.observation_space.shape[0]  # len(env.observation_space(env.possible_agents[0]).shape) * agent_size_modifier
+    num_actions = env.action_space.shape[0]
+    num_states = env.observation_space.shape[0]
 
     # create evaluate directory
     eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['name'] + '_' + str(time.time())
