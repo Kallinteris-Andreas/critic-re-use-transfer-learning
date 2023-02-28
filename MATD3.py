@@ -135,14 +135,15 @@ class model():
                 modules.soft_update_target_network(self.target_twin_critics[agent_id], self.twin_critics[agent_id], self.target_update_rate)
 
     def save(self, filename: str) -> None:
-        # torch.save(self.critics.state_dict(), filename + "_critic")
-        # torch.save(self.critics_optimizer.state_dict(), filename + "_critic_optimizer")
+        torch.save(self.twin_critics, filename + "_twin_critics")
+        torch.save(self.target_twin_critics, filename + "_target_twin_critics")
+        torch.save(self.twin_critics_optimizer, filename + "_twin_critics_optimizers")
 
-        # torch.save(self.actors.state_dict(), filename + "_actor")
-        # torch.save(self.actor_optimizer.state_dict(), filename + "_actor_optimizer")
+        torch.save(self.actors, filename + "_actors")
+        torch.save(self.target_actors, filename + "_target_actors")
+        torch.save(self.actors_optimizers, filename + "_actors_optimizers")
 
         # pickle.dump(self.erb, open(filename + '_erb', 'wb'))
-        pass
 
     def load(self, filename: str) -> None:
         # self.critics.load_state_dict(torch.load(filename + "_critic"))
