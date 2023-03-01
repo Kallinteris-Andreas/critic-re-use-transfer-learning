@@ -38,7 +38,7 @@ class model():
             self.target_twin_critics.append(copy.deepcopy(self.twin_critics[agent_id]))
             self.twin_critics_optimizer.append(torch.optim.Adam(self.twin_critics[agent_id].parameters(), config['TD3']['optimizer_gamma']))
 
-        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'])
+        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'], device=TORCH_DEVICE)
 
     @property
     def num_agents(self):
@@ -63,7 +63,7 @@ class model():
         observations_partions = zoo_env.map_global_state_to_local_observations([t for t in range(zoo_env.single_agent_env.observation_space.shape[0])])
         mapped_states = []
         for partition in observations_partions.values():
-            out_state = torch.Tensor(self.mini_batch_size, self.num_states_spaces[0])
+            out_state = torch.empty(self.mini_batch_size, self.num_states_spaces[0], device=TORCH_DEVICE)
             for idx, obs_idx in enumerate(partition):
                 out_state[:, idx] = state_batch[:, int(obs_idx)]
             mapped_states.append(out_state)
@@ -71,7 +71,7 @@ class model():
         return mapped_states
 
     def map_actions(self, zoo_env, fact_acts):
-        actions = torch.zeros(self.mini_batch_size, sum(self.num_actions_spaces))
+        actions = torch.zeros(self.mini_batch_size, sum(self.num_actions_spaces), device=TORCH_DEVICE)
         agent_action_partition = self.action_part(zoo_env)
         for agent_id in range(self.num_agents):
             for act_id in range(len(agent_action_partition[agent_id])):
@@ -91,15 +91,15 @@ class model():
             old_state_batch, actions_batch, reward_batch, new_state_batch, terminal_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
 
             # remap
-            new_state_batch_factored_torch = self.map_states(zoo_env, new_state_batch)
-            old_state_batch_factored_torch = self.map_states(zoo_env, old_state_batch)
+            new_state_batch_factored = self.map_states(zoo_env, new_state_batch)
+            old_state_batch_factored = self.map_states(zoo_env, old_state_batch)
 
             # update critic
             with torch.no_grad():
                 # select target action
                 target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
 
-                target_actions_pre = self.query_actor(new_state_batch_factored_torch, add_noise=False)
+                target_actions_pre = self.query_actor(new_state_batch_factored, add_noise=False)
                 target_actions = self.map_actions(zoo_env, target_actions_pre)
                 target_actions_batch = torch.clamp(target_actions + target_policy_noise, min=self.min_action, max=self.max_action)
 
@@ -117,7 +117,7 @@ class model():
 
             if (++self.total_step_iterations % self.policy_update_frequency) == 0:
                 # update actor
-                actor_action = self.actors[agent_id](old_state_batch_factored_torch[agent_id])
+                actor_action = self.actors[agent_id](old_state_batch_factored[agent_id])
                 agent_action_partition = self.action_part(zoo_env)[agent_id]
                 # replace actor action
                 new_actions = actions_batch.clone().detach()

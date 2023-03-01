@@ -21,7 +21,6 @@ def eval_policy(env_name: str, conf: str, seed: int = 256, eval_episodes: int = 
 
     total_return = 0
     for i in range(eval_episodes):
-        # state = eval_env.reset(seed=seed + i)[0]
         cur_state_dict = eval_env.reset(return_info=True, seed=seed + i)[0]
         terminated, truncated = 0, 0
         while not (terminated or truncated):
