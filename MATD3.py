@@ -62,8 +62,8 @@ class model():
         # global -> local
         observations_partions = zoo_env.map_global_state_to_local_observations([t for t in range(zoo_env.single_agent_env.observation_space.shape[0])])
         mapped_states = []
-        for partition in observations_partions.values():
-            out_state = torch.empty(self.mini_batch_size, self.num_states_spaces[0], device=TORCH_DEVICE)
+        for agent_id, partition in enumerate(observations_partions.values()):
+            out_state = torch.empty(self.mini_batch_size, self.num_states_spaces[agent_id], device=TORCH_DEVICE)
             for idx, obs_idx in enumerate(partition):
                 out_state[:, idx] = state_batch[:, int(obs_idx)]
             mapped_states.append(out_state)
