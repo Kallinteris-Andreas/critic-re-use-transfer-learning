@@ -59,11 +59,11 @@ if __name__ == "__main__":
     os.makedirs(eval_path)
     shutil.copyfile(args.config, eval_path + '/config.yaml')
 
-    # seed all the things
-    torch.manual_seed(config['domain']['seed'])
-    env.action_space.seed(config['domain']['seed'])
-
     for run in range(args.starting_run, config['domain']['runs']):
+        # seed all the things
+        torch.manual_seed(config['domain']['seed'] + run)
+        env.action_space.seed(config['domain']['seed'] + 1000 * run)
+
         model = generate_model(config['domain']['algo'])
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
