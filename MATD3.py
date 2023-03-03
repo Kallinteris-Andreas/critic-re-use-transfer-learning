@@ -115,6 +115,8 @@ class model():
             critics_loss.backward()
             self.twin_critics_optimizer[agent_id].step()
 
+            self.total_step_iterations += 1
+            # update actor
             if (++self.total_step_iterations % self.policy_update_frequency) == 0:
                 # update actor
                 actor_action = self.actors[agent_id](old_state_batch_factored[agent_id])
