@@ -9,6 +9,7 @@ import math
 import time
 import copy
 import pickle
+from icecream import ic
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # TORCH_DEVICE = "cpu"
@@ -51,6 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--starting_run", default=0, type=int)
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
+    config['domain']['factorization'] = None
 
     env = mamujoco_v0.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=1)
 
@@ -59,10 +61,10 @@ if __name__ == "__main__":
     min_action = env.action_space(env.possible_agents[0]).low[0]
     max_action = env.action_space(env.possible_agents[0]).high[0]
     # ic(num_actions_spaces)
-    # ic(num_observations_spaces)
+    ic(num_observations_spaces)
 
     # create evaluate directory
-    eval_path = 'results/' + config['domain']['algo'] + '_' + config['domain']['factorization'] + '_' + config['domain']['name'] + '_' + str(time.time())
+    eval_path = 'results/' + config['domain']['algo'] + '_' + str(config['domain']['factorization']) + '_' + config['domain']['name'] + '_' + str(time.time())
     os.makedirs(eval_path)
     shutil.copyfile(args.config, eval_path + '/config.yaml')
 
@@ -72,6 +74,8 @@ if __name__ == "__main__":
         [act_space.seed(config['domain']['seed'] + indx + run * 1000) for indx, act_space in enumerate(env.action_spaces.values())]
 
         model = generate_model(config['domain']['algo'])
+        model.twin_critics[0].load_state_dict(torch.load('best_run0_critic'))
+        model.actors[0].load_state_dict(torch.load('best_run0_actor'))
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
@@ -92,10 +96,10 @@ if __name__ == "__main__":
             new_state_dict, reward_dict, is_terminal_dict, is_truncated_dict, info_dict = env.step(actions_dict_numpy)
 
             # store to ERB
-            new_state = [torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE) for state in new_state_dict.values()]
             model.erb.add_experience(old_state=cur_state_full, actions=torch.tensor(env.map_local_actions_to_global_action(actions_dict_numpy), dtype=torch.float32, device=TORCH_DEVICE), reward=reward_dict[env.possible_agents[0]], new_state=torch.tensor(env.state(), dtype=torch.float32, device=TORCH_DEVICE), is_terminal=is_terminal_dict[env.possible_agents[0]])
 
             # update cur_state
+            new_state = [torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE) for state in new_state_dict.values()]
             cur_state = new_state
 
             if step >= config['domain']['init_learn_timestep']:
