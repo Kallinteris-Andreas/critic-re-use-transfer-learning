@@ -75,21 +75,25 @@ class model():
             modules.soft_update_target_network(self.target_critics, self.critics, self.target_update_rate)
 
     def save(self, filename: str) -> None:
-        torch.save(self.critics.state_dict(), filename + "_critic")
-        torch.save(self.critics_optimizer.state_dict(), filename + "_critic_optimizer")
+        torch.save(self.critics.state_dict(), filename + "_twin_critic")
+        torch.save(self.target_critics.state_dict(), filename + "_target_twin_critic")
+        torch.save(self.critics_optimizer.state_dict(), filename + "_twin_critics_optimizer")
 
         torch.save(self.actor.state_dict(), filename + "_actor")
+        torch.save(self.target_actor.state_dict(), filename + "_target_actor")
         torch.save(self.actor_optimizer.state_dict(), filename + "_actor_optimizer")
 
         # pickle.dump(self.erb, open(filename + '_erb', 'wb'))
 
     def load(self, filename: str) -> None:
-        self.critics.load_state_dict(torch.load(filename + "_critic"))
+        self.critics.load_state_dict(torch.load(filename + "_twin_critic"))
+        self.critics_target .load_state_dict(torch.load(filename + "_target_twin_critic"))
         self.critics_optimizer.load_state_dict(torch.load(filename + "_critic_optimizer"))
-        self.critics_target = copy.deepcopy(self.critic)
+        # self.critics_target = copy.deepcopy(self.critic)
 
         self.actor.load_state_dict(torch.load(filename + "_actor"))
+        self.target_actor.load_state_dict(torch.load(filename + "_target_actor"))
         self.actor_optimizer.load_state_dict(torch.load(filename + "_actor_optimizer"))
-        self.actor_target = copy.deepcopy(self.actor)
+        # self.actor_target = copy.deepcopy(self.actor)
 
         self.erb = pickle.load(open(filename + '_erb', 'rb'))
