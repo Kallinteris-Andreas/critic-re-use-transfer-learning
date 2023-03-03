@@ -47,7 +47,7 @@ if __name__ == "__main__":
     parser.add_argument("--starting_run", default=0, type=int)
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
-    config['domain']['name'] += 'v4'
+    config['domain']['name'] += '-v4'
 
     env = gymnasium.make(config['domain']['name'])
 
