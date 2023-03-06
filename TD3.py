@@ -62,7 +62,7 @@ class model():
         self.critics_optimizer.step()
 
         self.total_step_iterations += 1
-        if (++self.total_step_iterations % self.policy_update_frequency) == 0:
+        if (self.total_step_iterations % self.policy_update_frequency) == 0:
             # update actor
             policy_loss = (-self.critics.critic_0(old_state_batch, self.actor(old_state_batch))).mean()
 
