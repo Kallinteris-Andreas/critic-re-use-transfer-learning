@@ -81,6 +81,8 @@ class model():
 
     def action_part(self, zoo_env) -> list[list[int]]:
         # return list of action partiions
+        if zoo_env.agent_action_partitions[0][0].act_ids is None:
+            return [[act_id for act_id in range(self.num_actions_spaces[0])]]
         return [[part.act_ids for part in partion] for partion in zoo_env.agent_action_partitions]
 
     def train_model_step(self, zoo_env) -> None:
