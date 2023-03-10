@@ -3,10 +3,10 @@ import copy
 # import pickle
 import ERB
 import modules
-# from icecream import ic
+from icecream import ic
 
-TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# TORCH_DEVICE = "cpu"
+# TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+TORCH_DEVICE = "cpu"
 
 
 class model():
@@ -17,6 +17,7 @@ class model():
         self.min_action = min_action
         self.max_action = max_action
         self.total_step_iterations = 0
+        assert len(num_actions_spaces) == len(num_states_spaces)
 
         self.discount_rate = config['TD3']['gamma']
         self.target_update_rate = config['TD3']['tau']
@@ -27,13 +28,13 @@ class model():
         self.policy_update_frequency = config['TD3']['d']
 
         self.actors, self.target_actors, self.actors_optimizers = [], [], []
-        for agent_id in range(len(num_actions_spaces)):
+        for agent_id in range(self.num_agents):
             self.actors.append(modules.actor(num_actions_spaces[agent_id], num_states_spaces[agent_id], max_action, config['TD3']['mu_bias'], device=TORCH_DEVICE))
             self.target_actors.append(copy.deepcopy(self.actors[agent_id]))
             self.actors_optimizers.append(torch.optim.Adam(self.actors[agent_id].parameters(), config['TD3']['optimizer_gamma']))
 
         self.twin_critics, self.target_twin_critics, self.twin_critics_optimizer = [], [], []
-        for agent_id in range(len(num_actions_spaces)):
+        for agent_id in range(self.num_agents):
             self.twin_critics.append(modules.twin_critic(sum(num_actions_spaces), num_state_global, config['TD3']['q_bias'], device=TORCH_DEVICE))
             self.target_twin_critics.append(copy.deepcopy(self.twin_critics[agent_id]))
             self.twin_critics_optimizer.append(torch.optim.Adam(self.twin_critics[agent_id].parameters(), config['TD3']['optimizer_gamma']))
@@ -42,12 +43,14 @@ class model():
 
     @property
     def num_agents(self):
-        return len(self.actors)
+        return len(self.num_actions_spaces)
 
     def query_actor(self, state: list[torch.Tensor], add_noise: bool = True) -> list[torch.Tensor]:
         # eg state: [tensor([-0.0128,  0.0697,  0.0434,  0.0337, -0.0276]), tensor([-0.0708,  0.0141,  0.0259,  0.0337, -0.0276])]
-        # assert len(state) == len(self.num_actions_spaces)
-        # assert [s.size()[0] for s in state] == self.num_states_spaces
+        assert len(state) == len(self.num_actions_spaces)
+        assert len(state) == self.num_agents
+        # assert [s.size()[0] for s in state] == self.num_states_spaces, [s.size()[0] for s in state]
+
         actions = []
         for agent_id in range(len(state)):
             actions.append(self.actors[agent_id](state[agent_id]))
@@ -80,7 +83,7 @@ class model():
         return actions
 
     def action_part(self, zoo_env) -> list[list[int]]:
-        # return list of action partiions
+        # return list of action partitions
         if zoo_env.agent_action_partitions[0][0].act_ids is None:
             return [[act_id for act_id in range(self.num_actions_spaces[0])]]
         return [[part.act_ids for part in partion] for partion in zoo_env.agent_action_partitions]
@@ -119,8 +122,7 @@ class model():
 
             self.total_step_iterations += 1
             # update actor
-            if (++self.total_step_iterations % self.policy_update_frequency) == 0:
-                # update actor
+            if (self.total_step_iterations % self.policy_update_frequency) == 0:
                 actor_action = self.actors[agent_id](old_state_batch_factored[agent_id])
                 agent_action_partition = self.action_part(zoo_env)[agent_id]
                 # replace actor action
