@@ -30,7 +30,7 @@ class model():
         self.target_critics = copy.deepcopy(self.critics)  # q0-1'
         self.critics_optimizer = torch.optim.Adam(self.critics.parameters(), config['TD3']['optimizer_gamma'])
 
-        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'])
+        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'], device=TORCH_DEVICE)
 
     def query_actor(self, state: torch.Tensor, add_noise: bool = True) -> torch.Tensor:
         if add_noise:
