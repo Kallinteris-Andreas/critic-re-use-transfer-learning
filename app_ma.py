@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--starting_run", default=0, type=int)
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
-    config['domain']['factorization'] = None
+    config['domain']['algo'] = 'MA' + config['domain']['algo']
 
     env = mamujoco_v0.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=1)
 
