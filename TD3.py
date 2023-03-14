@@ -47,7 +47,7 @@ class model():
         # update critic
         with torch.no_grad():
             # select target action
-            target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
+            target_policy_noise = (torch.randn_like(actions_batch, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
             target_actions_batch = torch.clamp(self.target_actor(new_state_batch) + target_policy_noise, min=self.min_action, max=self.max_action)
             # compute y
             qt0, qt1 = self.target_critics(new_state_batch, target_actions_batch)

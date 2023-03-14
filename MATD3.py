@@ -102,7 +102,7 @@ class model():
             # update critic
             with torch.no_grad():
                 # select target action
-                target_policy_noise = (torch.randn(self.mini_batch_size, 1, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
+                target_policy_noise = (torch.randn_like(actions_batch, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
 
                 target_actions_pre = self.query_actor(new_state_batch_factored, add_noise=False)
                 target_actions = self.map_actions(zoo_env, target_actions_pre)
