@@ -37,13 +37,11 @@ def eval_policy(env_name: str, conf: str, seed: int = 256, eval_episodes: int = 
 
 
 def generate_model(model_name: str):
-    assert model_name == "MATD3"
-    return MATD3.model(num_actions_spaces, num_observations_spaces, len(env.state()), min_action, max_action, config)
-    # match model_name:
-    #    case 'MADDPG':
-    #        return DDPG.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], config=config)
-    #    case _:
-    #        assert False, 'invalid learning algorithm'
+    match model_name:
+        case 'TD3':
+            return MATD3.model(num_actions_spaces, num_observations_spaces, len(env.state()), min_action, max_action, config)
+        case _:
+            assert False, 'invalid learning algorithm'
 
 
 if __name__ == "__main__":
@@ -52,7 +50,6 @@ if __name__ == "__main__":
     parser.add_argument("--starting_run", default=0, type=int)
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
-    config['domain']['algo'] = 'MA' + config['domain']['algo']
 
     env = mamujoco_v0.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=1)
 
@@ -64,7 +61,7 @@ if __name__ == "__main__":
     ic(num_observations_spaces)
 
     # create evaluate directory
-    eval_path = 'results/' + config['domain']['algo'] + '_' + str(config['domain']['factorization']) + '_' + config['domain']['name'] + '_' + str(time.time())
+    eval_path = 'results/' + 'MA' + config['domain']['algo'] + '_' + str(config['domain']['factorization']) + '_' + config['domain']['name'] + '_' + str(time.time())
     os.makedirs(eval_path)
     shutil.copyfile(args.config, eval_path + '/config.yaml')
 
