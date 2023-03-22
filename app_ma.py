@@ -70,6 +70,7 @@ if __name__ == "__main__":
         torch.manual_seed(config['domain']['seed'] + run)
         [act_space.seed(config['domain']['seed'] + indx + run * 1000) for indx, act_space in enumerate(env.action_spaces.values())]
 
+        # create model
         model = generate_model(config['domain']['algo'])
         model.twin_critics[0].load_state_dict(torch.load('best_run0_critic'))
         model.actors[0].load_state_dict(torch.load('best_run0_actor'))
