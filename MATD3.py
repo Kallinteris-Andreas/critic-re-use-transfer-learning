@@ -104,8 +104,8 @@ class model():
                 # select target action
                 target_policy_noise = (torch.randn_like(actions_batch, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
 
-                target_actions_pre = self.query_actor(new_state_batch_factored, add_noise=False)
-                target_actions = self.map_actions(zoo_env, target_actions_pre)
+                target_actions_unmapped = [self.target_actors[agent_id](state) for agent_id, state in enumerate(new_state_batch_factored)]
+                target_actions = self.map_actions(zoo_env, target_actions_unmapped)
                 target_actions_batch = torch.clamp(target_actions + target_policy_noise, min=self.min_action, max=self.max_action)
 
                 # compute y
