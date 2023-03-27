@@ -125,12 +125,12 @@ class model():
             if (self.total_step_iterations % self.policy_update_frequency) == 0:
                 actor_action = self.actors[agent_id](old_state_batch_factored[agent_id])
                 agent_action_partition = self.action_part(zoo_env)[agent_id]
-                # replace actor action
-                new_actions = actions_batch.clone().detach()
+                # get team actions while replacing the actor actions
+                team_actions = actions_batch.clone().detach()
                 for index, act_id in enumerate(agent_action_partition):
-                    new_actions[:, act_id] = actor_action[:, index]
+                    team_actions[:, act_id] = actor_action[:, index]
 
-                policy_loss = (-self.twin_critics[agent_id].critic_0(old_state_batch, new_actions)).mean()
+                policy_loss = (-self.twin_critics[agent_id].critic_0(old_state_batch, team_actions)).mean()
 
                 self.actors_optimizers[agent_id].zero_grad()
                 policy_loss.backward()

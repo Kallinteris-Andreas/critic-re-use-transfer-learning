@@ -25,7 +25,7 @@ def eval_policy(env_name: str, conf: str, seed: int = 256, eval_episodes: int = 
         cur_state_dict = eval_env.reset(return_info=True, seed=seed + i)[0]
         terminated, truncated = 0, 0
         while not (terminated or truncated):
-            cur_state = [torch.tensor(v, dtype=torch.float32, device=TORCH_DEVICE) for v in cur_state_dict.values()]
+            cur_state = [torch.tensor(local_state, dtype=torch.float32, device=TORCH_DEVICE) for local_state in cur_state_dict.values()]
             actions = model.query_actor(cur_state, add_noise=False)
             actions_dict_numpy = {eval_env.possible_agents[agent_id]: actions[agent_id].tolist() for agent_id in range(len(eval_env.possible_agents))}
             cur_state_dict, reward_dict, is_terminal_dict, is_truncated_dict, info_dict = eval_env.step(actions_dict_numpy)
@@ -79,9 +79,9 @@ if __name__ == "__main__":
 
         cur_state_dict = env.reset(seed=config['domain']['seed'] + run, return_info=True)[0]
         for step in range(config['domain']['total_timesteps']):
-            # sample actions
-            cur_state = [torch.tensor(v, dtype=torch.float32, device=TORCH_DEVICE) for v in cur_state_dict.values()]
+            cur_state = [torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE) for state in cur_state_dict.values()]
             cur_state_full = torch.tensor(env.state(), dtype=torch.float32, device=TORCH_DEVICE)
+            # sample actions
             with torch.no_grad():
                 if step >= config['domain']['init_learn_timestep']:
                     actions = model.query_actor(cur_state, add_noise=True)
