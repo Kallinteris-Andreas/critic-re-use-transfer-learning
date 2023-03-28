@@ -18,8 +18,8 @@ TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Runs policy for X episodes and returns return reward
 # A fixed seed is used for the eval environment
-def eval_policy(env_name: str, conf: str, seed: int = 256, eval_episodes: int = 10) -> float:
-    eval_env = mamujoco_v0.parallel_env(scenario=env_name, agent_conf=conf)
+def eval_policy(env_name: str, conf: str, obsk: int, seed: int = 256, eval_episodes: int = 10) -> float:
+    eval_env = mamujoco_v0.parallel_env(scenario=env_name, agent_conf=conf, agent_obsk=obsk)
 
     total_return = 0
     for i in range(eval_episodes):
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
-    env = mamujoco_v0.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=1)
+    env = mamujoco_v0.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=config['domain']['obsk'])
 
     num_actions_spaces = [env.action_space(agent).shape[0] for agent in env.possible_agents]
     num_observations_spaces = [env.observation_space(agent).shape[0] for agent in env.possible_agents]
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
             # evaluate
             if step % config['domain']['evaluation_frequency'] == 0 and step >= config['domain']['init_learn_timestep']:  # evaluate episode
-                total_evalution_return = eval_policy(config['domain']['name'], config['domain']['factorization'])
+                total_evalution_return = eval_policy(config['domain']['name'], config['domain']['factorization'], config['domain']['obsk'])
                 print('Run: ' + str(run) + ' Training Step: ' + str(step) + ' return: ' + str(total_evalution_return))
                 eval_file.write(str(total_evalution_return) + '\n')
                 if (eval_max_return < total_evalution_return):
