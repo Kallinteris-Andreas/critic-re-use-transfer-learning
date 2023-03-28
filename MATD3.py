@@ -60,8 +60,11 @@ class model():
 
         return actions
 
-    def map_states(self, zoo_env, state_batch: torch.Tensor):
-        # global -> local
+    def map_states(self, zoo_env, state_batch: torch.Tensor) -> list[torch.Tensor]:
+        """Maps the states from a global states(/obsrvations) to list of local state(/observations)"""
+        if str(type(zoo_env)) != "<class 'gymnasium_robotics.envs.multiagent_mujoco.mujoco_multi.MultiAgentMujocoEnv'>":
+            assert False
+
         observations_partions = zoo_env.map_global_state_to_local_observations([t for t in range(zoo_env.single_agent_env.observation_space.shape[0])])
         mapped_states = []
         for agent_id, partition in enumerate(observations_partions.values()):
