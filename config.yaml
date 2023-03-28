@@ -12,7 +12,6 @@ domain:
   seed: 64 # seeds the enviroment
 DDPG:
   gamma: 0.99 # Reward Discount rate
-  #gamma: 1
   tau: 0.01 # Target Network Update rate
   N: 100 # Experience Replay Buffer's mini match size
   experience_replay_buffer_size: 1000000
