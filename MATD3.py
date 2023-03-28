@@ -10,7 +10,7 @@ TORCH_DEVICE = "cpu"
 
 
 class model():
-    def __init__(self, num_actions_spaces: list[int], num_states_spaces: list[int], num_state_global: int, min_action: float, max_action: float, config: dict):
+    def __init__(self, num_actions_spaces: list[int], num_states_spaces: list[int], num_state_global: int, min_action: float, max_action: float, config: dict, torch_device="cpu"):
         assert min_action < max_action and len(num_actions_spaces) == len(num_states_spaces)
         self.num_actions_spaces = num_actions_spaces
         self.num_states_spaces = num_states_spaces
@@ -18,6 +18,8 @@ class model():
         self.max_action = max_action
         self.total_step_iterations = 0
         assert len(num_actions_spaces) == len(num_states_spaces)
+
+        self.device = torch_device
 
         self.discount_rate = config['TD3']['gamma']
         self.target_update_rate = config['TD3']['tau']
@@ -29,17 +31,17 @@ class model():
 
         self.actors, self.target_actors, self.actors_optimizers = [], [], []
         for agent_id in range(self.num_agents):
-            self.actors.append(modules.actor(num_actions_spaces[agent_id], num_states_spaces[agent_id], max_action, config['TD3']['mu_bias'], device=TORCH_DEVICE))
+            self.actors.append(modules.actor(num_actions_spaces[agent_id], num_states_spaces[agent_id], max_action, config['TD3']['mu_bias'], device=self.device))
             self.target_actors.append(copy.deepcopy(self.actors[agent_id]))
             self.actors_optimizers.append(torch.optim.Adam(self.actors[agent_id].parameters(), config['TD3']['optimizer_gamma']))
 
         self.twin_critics, self.target_twin_critics, self.twin_critics_optimizer = [], [], []
         for agent_id in range(self.num_agents):
-            self.twin_critics.append(modules.twin_critic(sum(num_actions_spaces), num_state_global, config['TD3']['q_bias'], device=TORCH_DEVICE))
+            self.twin_critics.append(modules.twin_critic(sum(num_actions_spaces), num_state_global, config['TD3']['q_bias'], device=self.device))
             self.target_twin_critics.append(copy.deepcopy(self.twin_critics[agent_id]))
             self.twin_critics_optimizer.append(torch.optim.Adam(self.twin_critics[agent_id].parameters(), config['TD3']['optimizer_gamma']))
 
-        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'], device=TORCH_DEVICE)
+        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'], device=self.device)
 
     @property
     def num_agents(self):
@@ -66,7 +68,7 @@ class model():
         observations_partions = zoo_env.map_global_state_to_local_observations([t for t in range(zoo_env.single_agent_env.observation_space.shape[0])])
         mapped_states = []
         for agent_id, partition in enumerate(observations_partions.values()):
-            out_state = torch.empty(self.mini_batch_size, self.num_states_spaces[agent_id], device=TORCH_DEVICE)
+            out_state = torch.empty(self.mini_batch_size, self.num_states_spaces[agent_id], device=self.device)
             for idx, obs_idx in enumerate(partition):
                 out_state[:, idx] = state_batch[:, int(obs_idx)]
             mapped_states.append(out_state)
@@ -74,7 +76,7 @@ class model():
         return mapped_states
 
     def map_actions(self, zoo_env, fact_acts):
-        actions = torch.zeros(self.mini_batch_size, sum(self.num_actions_spaces), device=TORCH_DEVICE)
+        actions = torch.zeros(self.mini_batch_size, sum(self.num_actions_spaces), device=self.device)
         agent_action_partition = self.action_part(zoo_env)
         for agent_id in range(self.num_agents):
             for act_id in range(len(agent_action_partition[agent_id])):
@@ -102,7 +104,7 @@ class model():
             # update critic
             with torch.no_grad():
                 # select target action
-                target_policy_noise = (torch.randn_like(actions_batch, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
+                target_policy_noise = (torch.randn_like(actions_batch, device=self.device) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
 
                 target_actions_unmapped = [self.target_actors[agent_id](state) for agent_id, state in enumerate(new_state_batch_factored)]
                 target_actions = self.map_actions(zoo_env, target_actions_unmapped)

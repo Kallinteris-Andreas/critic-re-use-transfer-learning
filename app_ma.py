@@ -40,7 +40,7 @@ def eval_policy(env_name: str, conf: str, seed: int = 256, eval_episodes: int = 
 def generate_model(model_name: str):
     match model_name:
         case 'TD3':
-            return MATD3.model(num_actions_spaces, num_observations_spaces, len(env.state()), min_action, max_action, config)
+            return MATD3.model(num_actions_spaces, num_observations_spaces, len(env.state()), min_action, max_action, config, torch_device=TORCH_DEVICE)
         case _:
             assert False, 'invalid learning algorithm'
 
