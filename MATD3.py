@@ -5,9 +5,6 @@ import ERB
 import modules
 from icecream import ic
 
-# TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-TORCH_DEVICE = "cpu"
-
 
 class model():
     def __init__(self, num_actions_spaces: list[int], num_states_spaces: list[int], num_state_global: int, min_action: float, max_action: float, config: dict, torch_device="cpu"):
