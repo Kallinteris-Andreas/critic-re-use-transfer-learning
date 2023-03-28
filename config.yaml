@@ -1,10 +1,10 @@
 domain:
-  name: Ant
-  factorization: 2x4 # agent factorization used, check MaMuJoCo Doc for more info
+  name: Hopper
+  factorization: null # agent factorization used, check MaMuJoCo Doc for more info
   obsk: 1 # Not used
   total_timesteps: 2_000_000 # how many learn steps the agent should take
   #episodes: 1000
-  algo: MATD3 # Valid values: 'DDPG', 'TD3', 'MADDPG'
+  algo: TD3 # Valid values: 'DDPG', 'TD3', 'MADDPG'
   init_learn_timestep: 25001 # at which timestep should the agent start learning
   #learning_starts_ep: 10 # Start Learning at episode X, before that fill the ERB with random actions
   evaluation_frequency: 5000 # how ofter should the agent be evaluated
