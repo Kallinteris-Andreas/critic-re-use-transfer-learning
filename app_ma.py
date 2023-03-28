@@ -57,7 +57,7 @@ if __name__ == "__main__":
     num_observations_spaces = [env.observation_space(agent).shape[0] for agent in env.possible_agents]
     min_action = env.action_space(env.possible_agents[0]).low[0]
     max_action = env.action_space(env.possible_agents[0]).high[0]
-    # ic(num_actions_spaces)
+    ic(num_actions_spaces)
     ic(num_observations_spaces)
 
     # create evaluate directory
@@ -78,8 +78,8 @@ if __name__ == "__main__":
         eval_max_return = -math.inf
 
         cur_state_dict = env.reset(seed=config['domain']['seed'] + run, return_info=True)[0]
+        cur_state = [torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE) for state in cur_state_dict.values()]
         for step in range(config['domain']['total_timesteps']):
-            cur_state = [torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE) for state in cur_state_dict.values()]
             cur_state_full = torch.tensor(env.state(), dtype=torch.float32, device=TORCH_DEVICE)
             # sample actions
             with torch.no_grad():
@@ -105,6 +105,7 @@ if __name__ == "__main__":
 
             if is_terminal_dict[env.possible_agents[0]] or is_truncated_dict[env.possible_agents[0]]:
                 cur_state_dict = env.reset(return_info=True)[0]
+                cur_state = [torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE) for state in cur_state_dict.values()]
 
             # evaluate
             if step % config['domain']['evaluation_frequency'] == 0 and step >= config['domain']['init_learn_timestep']:  # evaluate episode
