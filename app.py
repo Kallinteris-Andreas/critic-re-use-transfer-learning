@@ -69,8 +69,8 @@ if __name__ == "__main__":
         eval_max_return = -math.inf
 
         cur_state = torch.tensor(env.reset(seed=config['domain']['seed'])[0] + run, dtype=torch.float32, device=TORCH_DEVICE)
-        for steps in range(config['domain']['total_timesteps']):
-            if steps >= config['domain']['init_learn_timestep']:
+        for step in range(config['domain']['total_timesteps']):
+            if step >= config['domain']['init_learn_timestep']:
                 actions = model.query_actor(cur_state, add_noise=True)
             else:
                 actions = torch.tensor(env.action_space.sample(), dtype=torch.float32, device=TORCH_DEVICE)
@@ -80,15 +80,15 @@ if __name__ == "__main__":
             model.erb.add_experience(old_state=cur_state, actions=actions.detach(), reward=reward, new_state=torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE), is_terminal=is_terminal)
             cur_state = torch.tensor(new_state, dtype=torch.float32, device=TORCH_DEVICE)
 
-            if steps >= config['domain']['init_learn_timestep']:
+            if step >= config['domain']['init_learn_timestep']:
                 model.train_model_step()
 
             if is_terminal or is_truncated:
                 cur_state = torch.tensor(env.reset()[0], dtype=torch.float32, device=TORCH_DEVICE)
 
-            if steps % config['domain']['evaluation_frequency'] == 0 and steps >= config['domain']['init_learn_timestep']:  # evaluate episode
+            if step % config['domain']['evaluation_frequency'] == 0 and step >= config['domain']['init_learn_timestep']:  # evaluate episode
                 total_evalution_return = eval_policy(config['domain']['name'])
-                print('Run: ' + str(run) + ' Training Step: ' + str(steps) + ' return: ' + str(total_evalution_return))
+                print('Run: ' + str(run) + ' Training Step: ' + str(step) + ' return: ' + str(total_evalution_return))
                 eval_file.write(str(total_evalution_return) + '\n')
                 if (eval_max_return < total_evalution_return):
                     eval_max_return = total_evalution_return
