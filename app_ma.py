@@ -9,6 +9,7 @@ import math
 import time
 import copy
 import pickle
+import random
 from icecream import ic
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -69,6 +70,7 @@ if __name__ == "__main__":
         # seed all the things
         torch.manual_seed(config['domain']['seed'] + run)
         [act_space.seed(config['domain']['seed'] + indx + run * 1000) for indx, act_space in enumerate(env.action_spaces.values())]
+        random.seed(config['domain']['seed'] + run)
 
         # create model
         model = generate_model(config['domain']['algo'])

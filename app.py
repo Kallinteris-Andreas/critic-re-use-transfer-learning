@@ -9,6 +9,7 @@ import shutil
 import math
 import argparse
 import DDPG
+import random
 import TD3
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -63,6 +64,7 @@ if __name__ == "__main__":
         # seed all the things
         torch.manual_seed(config['domain']['seed'] + run)
         env.action_space.seed(config['domain']['seed'] + 1000 * run)
+        random.seed(config['domain']['seed'] + run)
 
         model = generate_model(config['domain']['algo'])
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
