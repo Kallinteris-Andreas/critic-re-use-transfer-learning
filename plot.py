@@ -6,10 +6,12 @@ import yaml
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--result", default='config.yaml')
+    parser.add_argument("--result_directory", default='good_res/TD3_InvertedDoublePendulum-v4/')
     args = parser.parse_args()
-    eval_path = 'good_res/TD3_InvertedDoublePendulum-v4/'
+    eval_path = args.result_directory
     config = yaml.safe_load(open(eval_path + 'config.yaml', 'r'))
+
+    # get data
     data = []
     for file in os.listdir(eval_path):
         if file.endswith('.csv'):
@@ -20,6 +22,7 @@ if __name__ == "__main__":
     min_v = np.min(data, axis=1)
     max_v = np.max(data, axis=1)
 
+    # plot
     x_axis = np.arange(start=30000, step=config['domain']['evaluation_frequency'], stop=100_000)
 
     fig = plt.figure()
