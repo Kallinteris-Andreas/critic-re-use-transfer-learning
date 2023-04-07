@@ -94,6 +94,8 @@ class model():
         if len(self.erb.buffer) < self.mini_batch_size:
             return
 
+        self.total_step_iterations += 1
+
         for agent_id in range(self.num_agents):
             old_state_batch, actions_batch, reward_batch, new_state_batch, terminal_batch = self.erb.sample_batch_and_split(self.mini_batch_size)
 
@@ -122,7 +124,6 @@ class model():
             critics_loss.backward()
             self.twin_critics_optimizer[agent_id].step()
 
-            self.total_step_iterations += 1
             # update actor
             if (self.total_step_iterations % self.policy_update_frequency) == 0:
                 actor_action = self.actors[agent_id](old_state_batch_factored[agent_id])
