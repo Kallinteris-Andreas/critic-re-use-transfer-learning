@@ -4,7 +4,7 @@ domain:
   obsk: 1 # Not used
   total_timesteps: 2_000_000 # how many learn steps the agent should take
   #episodes: 1000
-  algo: TD3 # Valid values: 'DDPG', 'TD3', 'MADDPG'
+  algo: TD3 # Valid values: 'DDPG', 'TD3', 'TD3-cc'
   init_learn_timestep: 25001 # at which timestep should the agent start learning
   #learning_starts_ep: 10 # Start Learning at episode X, before that fill the ERB with random actions
   evaluation_frequency: 5000 # how ofter should the agent be evaluated
@@ -19,7 +19,7 @@ DDPG:
   optimizer_gamma: 0.001 # the learning rate of the optimizers
   mu_bias: True # Bias for the actor module
   q_bias: True # Bias for the critic module
-TD3:
+TD3: # Used by 'TD3' and 'TD3-cc'
   gamma: 0.99 # Reward Discount rate
   tau: 0.005 # Target Network Update rate
   N: 256 # Experience Replay Buffer's mini match size

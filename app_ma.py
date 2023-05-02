@@ -1,5 +1,6 @@
 from gymnasium_robotics import mamujoco_v0
 import MATD3
+import MATD3_cc
 import torch
 import argparse
 import yaml
@@ -40,7 +41,9 @@ def eval_policy(env_name: str, conf: str, obsk: int, seed: int = 256, eval_episo
 def generate_model(model_name: str):
     match model_name:
         case 'TD3':
-            return MATD3.model(num_actions_spaces, num_observations_spaces, len(env.state()), min_action, max_action, config, torch_device=TORCH_DEVICE)
+            return MATD3.model(num_actions_spaces, num_observations_spaces, num_global_observation_space, min_action, max_action, config, torch_device=TORCH_DEVICE)
+        case 'TD3-cc':
+            return MATD3_cc.model(num_actions_spaces, num_observations_spaces, num_global_observation_space, min_action, max_action, config, torch_device=TORCH_DEVICE)
         case _:
             assert False, 'invalid learning algorithm'
 
