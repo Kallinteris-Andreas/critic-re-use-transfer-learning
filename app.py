@@ -12,7 +12,8 @@ import DDPG
 import random
 import TD3
 
-TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+TORCH_DEVICE = "cpu"
 
 
 # Runs policy for X episodes and returns return reward
@@ -67,6 +68,17 @@ if __name__ == "__main__":
         random.seed(config['domain']['seed'] + run)
 
         model = generate_model(config['domain']['algo'])
+        #model.critics.load_state_dict(torch.load('best_run0_twin_critic_inv_d'))
+        #model.target_critics.load_state_dict(torch.load('best_run0_target_twin_critic_inv_d'))
+        #model.target_actor.load_state_dict(torch.load('best_run0_target_actor_inv_d'))
+        #model.actor.load_state_dict(torch.load('best_run0_actor_inv_d'))
+
+        #model.critics.load_state_dict(torch.load('best_run0_twin_critic_hopper'))
+        #model.target_critics.load_state_dict(torch.load('best_run0_twin_critic_hopper'))
+        #model.target_actor.load_state_dict(torch.load('best_run0_actor_hopper'))
+        #model.actor.load_state_dict(torch.load('best_run0_actor_hopper'))
+
+        # create evaluation file
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
@@ -96,7 +108,7 @@ if __name__ == "__main__":
                     eval_max_return = total_evalution_return
                     best_model = copy.deepcopy(model)
 
-        print('Run: ' + str(run) + ' Max return: ' + str(eval_max_return))
-        print('Finished score can be found at: ' + eval_path + '/score' + str(run) + '.csv')
         best_model.save(eval_path + '/' + 'best_run' + str(run))
         pickle.dump(model.erb, open(eval_path + '/' + 'best_run' + str(run) + '_erb', 'wb'))
+        print('Run: ' + str(run) + ' Max return: ' + str(eval_max_return))
+        print('Finished score can be found at: ' + eval_path + '/score' + str(run) + '.csv')
