@@ -24,7 +24,7 @@ def eval_policy(env_name: str, conf: str, obsk: int, seed: int = 256, eval_episo
 
     total_return = 0
     for i in range(eval_episodes):
-        cur_state_dict = eval_env.reset(return_info=True, seed=seed + i)[0]
+        cur_state_dict = eval_env.reset(seed=seed + i)[0]
         terminated, truncated = 0, 0
         while not (terminated or truncated):
             cur_state = [torch.tensor(local_state, dtype=torch.float32, device=TORCH_DEVICE) for local_state in cur_state_dict.values()]
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
-        cur_state_dict = env.reset(seed=config['domain']['seed'] + run, return_info=True)[0]
+        cur_state_dict = env.reset(seed=config['domain']['seed'] + run)[0]
         cur_state = [torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE) for state in cur_state_dict.values()]
         for step in range(config['domain']['total_timesteps']):
             cur_state_full = torch.tensor(env.state(), dtype=torch.float32, device=TORCH_DEVICE)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
                 model.train_model_step(env)
 
             if is_terminal_dict[env.possible_agents[0]] or is_truncated_dict[env.possible_agents[0]]:
-                cur_state_dict = env.reset(return_info=True)[0]
+                cur_state_dict = env.reset()[0]
                 cur_state = [torch.tensor(state, dtype=torch.float32, device=TORCH_DEVICE) for state in cur_state_dict.values()]
 
             # evaluate
