@@ -59,10 +59,12 @@ if __name__ == "__main__":
 
     num_actions_spaces = [env.action_space(agent).shape[0] for agent in env.possible_agents]
     num_observations_spaces = [env.observation_space(agent).shape[0] for agent in env.possible_agents]
+    num_global_observation_space = len(env.state())
     min_action = env.action_space(env.possible_agents[0]).low[0]
     max_action = env.action_space(env.possible_agents[0]).high[0]
     ic(num_actions_spaces)
     ic(num_observations_spaces)
+    ic(num_global_observation_space)
 
     # create evaluate directory
     eval_path = 'results/' + 'MA' + config['domain']['algo'] + '_' + str(config['domain']['factorization']) + '_' + config['domain']['name'] + '_' + str(time.time())
