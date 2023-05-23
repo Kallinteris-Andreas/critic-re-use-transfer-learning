@@ -79,8 +79,20 @@ if __name__ == "__main__":
 
         # create model
         model = generate_model(config['domain']['algo'])
-        model.twin_critics[0].load_state_dict(torch.load('best_run0_critic'))
-        model.actors[0].load_state_dict(torch.load('best_run0_actor'))
+        #model.twin_critics[0].load_state_dict(torch.load('best_run0_twin_critic_inv_d'))
+        #model.target_twin_critics[0].load_state_dict(torch.load('best_run0_target_twin_critic_inv_d'))
+        #model.target_actors[0].load_state_dict(torch.load('best_run0_target_actor_inv_d'))
+        #model.actors[0].load_state_dict(torch.load('best_run0_actor_inv_d'))
+
+        #model.twin_critics[0].load_state_dict(torch.load('best_run0_twin_critic_hopper'))
+        #model.target_twin_critics[0].load_state_dict(torch.load('best_run0_twin_critic_hopper'))
+        #model.target_actors[0].load_state_dict(torch.load('best_run0_actor_hopper'))
+        #model.actors[0].load_state_dict(torch.load('best_run0_actor_hopper'))
+
+        #model.actors[0].load_state_dict(torch.load('best_run0_actor_inv'))
+        #model.twin_critics[0].load_state_dict(torch.load('best_run0_critic_inv'))
+
+        # create evaluation file
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
         eval_max_return = -math.inf
 
