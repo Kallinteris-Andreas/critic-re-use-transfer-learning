@@ -13,8 +13,8 @@ import pickle
 import random
 from icecream import ic
 
-TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# TORCH_DEVICE = "cpu"
+#TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+TORCH_DEVICE = "cpu"
 
 
 # Runs policy for X episodes and returns return reward
