@@ -148,9 +148,9 @@ class model():
             modules.soft_update_target_network(self.target_twin_critic, self.twin_critic, self.target_update_rate)
 
     def save(self, filename: str) -> None:
-        torch.save(self.twin_critics, filename + "_twin_critics")
-        torch.save(self.target_twin_critics, filename + "_target_twin_critics")
-        torch.save(self.twin_critics_optimizer, filename + "_twin_critics_optimizers")
+        torch.save(self.twin_critic, filename + "_twin_critic")
+        torch.save(self.target_twin_critic, filename + "_target_twin_critic")
+        torch.save(self.twin_critic_optimizer, filename + "_twin_critics_optimizer")
 
         torch.save(self.actors, filename + "_actors")
         torch.save(self.target_actors, filename + "_target_actors")
