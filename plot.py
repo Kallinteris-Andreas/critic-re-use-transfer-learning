@@ -38,8 +38,9 @@ if __name__ == "__main__":
     ax.set_ylabel("Return")
     ax.set_xlabel("Timestep")
     ax.legend()
-    #plt.show()
+    # plt.show()
 
-    file_name = config['domain']['name']
+    # file_name = config['domain']['name']
+    file_name = "figure"
     plt.savefig(file_name + ".eps", bbox_inches="tight")
     plt.savefig(file_name + ".png", bbox_inches="tight")
