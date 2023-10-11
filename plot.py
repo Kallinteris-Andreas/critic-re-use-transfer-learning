@@ -30,7 +30,7 @@ if __name__ == "__main__":
         # plot
         x_axis = np.arange(start=30000, step=config['domain']['evaluation_frequency'], stop=2_000_000)
 
-        ax.plot(x_axis, avg, label=str(config['domain']['factorization']))
+        ax.plot(x_axis, avg, label=f"{config['domain']['factorization']}-{config['domain']['algo']}")
         ax.fill_between(x_axis, min_v, max_v, alpha=0.2)
 
         ax.set_title("Average Regret over " + str(data.shape[1]) + " statistical runs, on " + config['domain']['name'])
