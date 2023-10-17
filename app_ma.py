@@ -20,7 +20,7 @@ TORCH_DEVICE = "cpu"
 # Runs policy for X episodes and returns return reward
 # A fixed seed is used for the eval environment
 def eval_policy(env_name: str, conf: str, obsk: int, seed: int = 256, eval_episodes: int = 10) -> float:
-    eval_env = mamujoco_v1.parallel_env(scenario=env_name, agent_conf=conf, agent_obsk=obsk)
+    eval_env = mamujoco_v1.parallel_env(scenario=env_name, agent_conf=conf, agent_obsk=obsk, local_categories=[['qpos', 'qvel'], ['qpos']])
 
     total_return = 0
     for i in range(eval_episodes):
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
-    env = mamujoco_v1.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=config['domain']['obsk'])
+    env = mamujoco_v1.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=config['domain']['obsk'], local_categories=[['qpos', 'qvel'], ['qpos']])
 
     num_actions_spaces = [env.action_space(agent).shape[0] for agent in env.possible_agents]
     num_observations_spaces = [env.observation_space(agent).shape[0] for agent in env.possible_agents]

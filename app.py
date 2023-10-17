@@ -12,14 +12,17 @@ import DDPG
 import random
 import TD3
 
-#TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 TORCH_DEVICE = "cpu"
 
 
 # Runs policy for X episodes and returns return reward
 # A fixed seed is used for the eval environment
 def eval_policy(env_name: str, seed: int = 256, eval_episodes: int = 10) -> float:
-    eval_env = gymnasium.make(env_name)
+    if config['domain']['name'] == "Ant-v5":
+        eval_env = gymnasium.make(config['domain']['name'], include_cfrc_ext_in_observation=False)
+    else:
+        eval_env = gymnasium.make(config['domain']['name'])
 
     total_return = 0
     for i in range(eval_episodes):
@@ -52,6 +55,8 @@ if __name__ == "__main__":
     config['domain']['name'] += '-v5'
 
     if config['domain']['name'] == "Ant-v5":
+        env = gymnasium.make(config['domain']['name'], include_cfrc_ext_in_observation=False)
+    else:
         env = gymnasium.make(config['domain']['name'])
 
     num_actions = env.action_space.shape[0]
