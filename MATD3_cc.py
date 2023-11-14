@@ -63,7 +63,8 @@ class model():
         if str(type(zoo_env)) != "<class 'gymnasium_robotics.envs.multiagent_mujoco.mujoco_multi.MultiAgentMujocoEnv'>":
             assert False
 
-        observations_partions = zoo_env.map_global_state_to_local_observations([t for t in range(zoo_env.single_agent_env.observation_space.shape[0])])
+        # observations_partions = zoo_env.map_global_state_to_local_observations([t for t in range(zoo_env.single_agent_env.observation_space.shape[0])])
+        observations_partions = zoo_env.observation_factorization
         mapped_states = []
         for agent_id, partition in enumerate(observations_partions.values()):
             out_state = torch.empty(self.mini_batch_size, self.num_states_spaces[agent_id], device=self.device)
