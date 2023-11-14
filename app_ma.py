@@ -52,6 +52,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default='config.yaml')
     parser.add_argument("--starting_run", default=0, type=int)
+    parser.add_argument("--final_run", default=int(1e6), type=int)
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
@@ -71,7 +72,7 @@ if __name__ == "__main__":
     os.makedirs(eval_path)
     shutil.copyfile(args.config, eval_path + '/config.yaml')
 
-    for run in range(args.starting_run, config['domain']['runs']):
+    for run in range(args.starting_run, min(config['domain']['runs'], args.final_run + 1)):
         # seed all the things
         torch.manual_seed(config['domain']['seed'] + run)
         [act_space.seed(config['domain']['seed'] + indx + run * 1000) for indx, act_space in enumerate(env.action_spaces.values())]

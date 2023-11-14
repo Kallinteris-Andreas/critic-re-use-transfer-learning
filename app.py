@@ -12,8 +12,7 @@ import DDPG
 import random
 import TD3
 
-# TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-TORCH_DEVICE = "cpu"
+TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 # Runs policy for X episodes and returns return reward
@@ -50,6 +49,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default='config.yaml')
     parser.add_argument("--starting_run", default=0, type=int)
+    parser.add_argument("--final_run", default=int(1e6), type=int)
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
     config['domain']['name'] += '-v5'
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     os.makedirs(eval_path)
     shutil.copyfile(args.config, eval_path + '/config.yaml')
 
-    for run in range(args.starting_run, config['domain']['runs']):
+    for run in range(args.starting_run, min(config['domain']['runs'], args.final_run + 1)):
         # seed all the things
         torch.manual_seed(config['domain']['seed'] + run)
         env.action_space.seed(config['domain']['seed'] + 1000 * run)
