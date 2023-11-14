@@ -17,15 +17,18 @@ if __name__ == "__main__":
         config = yaml.safe_load(open(eval_path + '/' + 'config.yaml', 'r'))
 
         # get data
+        files = []
         data = []
         for file in os.listdir(eval_path):
             if file.endswith('.csv'):
-                print(file)
+                # print(file)
+                files.append(file)
                 data.append(np.genfromtxt(eval_path + "/" + file, delimiter=','))
         data = np.stack(data, axis=1)
         avg = np.average(data, axis=1)
         min_v = np.min(data, axis=1)
         max_v = np.max(data, axis=1)
+        print(f"the best is: {files[np.argmax(np.max(data, axis=0))]}")
 
         # plot
         x_axis = np.arange(start=30000, step=config['domain']['evaluation_frequency'], stop=2_000_000)
