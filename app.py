@@ -40,7 +40,7 @@ def generate_model(model_name: str):
         case 'DDPG':
             return DDPG.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], config=config)
         case 'TD3':
-            return TD3.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], config=config)
+            return TD3.model(num_actions, num_states, min_action=env.action_space.low[0], max_action=env.action_space.high[0], config=config, torch_device=TORCH_DEVICE)
         case _:
             assert False, 'invalid learning algorithm'
 

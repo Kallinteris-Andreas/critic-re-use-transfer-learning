@@ -4,16 +4,16 @@ import pickle
 import ERB
 import modules
 
-TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 
 class model():
-    def __init__(self, num_actions: int, num_states: int, min_action: float, max_action: float, config: dict):
+    def __init__(self, num_actions: int, num_states: int, min_action: float, max_action: float, config: dict, torch_device="cpu"):
         assert num_actions > 0 and num_states > 0 and min_action < max_action
         self.num_actions = num_actions
         self.min_action = min_action
         self.max_action = max_action
         self.total_step_iterations = 0
+
+        self.device = torch_device
 
         self.discount_rate = config['TD3']['gamma']
         self.target_update_rate = config['TD3']['tau']
@@ -23,18 +23,18 @@ class model():
         self.noise_policy_clip = config['TD3']['noise_policy_clip']
         self.policy_update_frequency = config['TD3']['d']
 
-        self.actor = modules.actor(num_actions, num_states, max_action, config['TD3']['mu_bias'], device=TORCH_DEVICE)  # mu
+        self.actor = modules.actor(num_actions, num_states, max_action, config['TD3']['mu_bias'], device=self.device)  # mu
         self.target_actor = copy.deepcopy(self.actor)  # mu'
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), config['TD3']['optimizer_gamma'])
-        self.critics = modules.twin_critic(num_actions, num_states, config['TD3']['q_bias'], device=TORCH_DEVICE)  # q0-1
+        self.critics = modules.twin_critic(num_actions, num_states, config['TD3']['q_bias'], device=self.device)  # q0-1
         self.target_critics = copy.deepcopy(self.critics)  # q0-1'
         self.critics_optimizer = torch.optim.Adam(self.critics.parameters(), config['TD3']['optimizer_gamma'])
 
-        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'], device=TORCH_DEVICE)
+        self.erb = ERB.experience_replay_buffer(config['TD3']['experience_replay_buffer_size'], device=self.device)
 
     def query_actor(self, state: torch.Tensor, add_noise: bool = True) -> torch.Tensor:
         if add_noise:
-            return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=TORCH_DEVICE) * self.noise_exploration_standard_deviation, min=self.min_action, max=self.max_action)
+            return torch.clamp(self.actor(state) + torch.randn(self.num_actions, device=self.device) * self.noise_exploration_standard_deviation, min=self.min_action, max=self.max_action)
         else:
             return self.actor(state)
 
@@ -49,7 +49,7 @@ class model():
         # update critic
         with torch.no_grad():
             # select target action
-            target_policy_noise = (torch.randn_like(actions_batch, device=TORCH_DEVICE) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
+            target_policy_noise = (torch.randn_like(actions_batch, device=self.device) * self.noise_policy_standard_deviation).clamp(min=-self.noise_policy_clip, max=self.noise_policy_clip)
             target_actions_batch = torch.clamp(self.target_actor(new_state_batch) + target_policy_noise, min=self.min_action, max=self.max_action)
             # compute y
             qt0, qt1 = self.target_critics(new_state_batch, target_actions_batch)
