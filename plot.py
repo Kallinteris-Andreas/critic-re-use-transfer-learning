@@ -28,7 +28,7 @@ if __name__ == "__main__":
         avg = np.average(data, axis=1)
         min_v = np.min(data, axis=1)
         max_v = np.max(data, axis=1)
-        print(f"the best is: {files[np.argmax(np.max(data, axis=0))]}")
+        print(f"the best is: {files[np.argmax(np.max(data, axis=0))]}, with max = {np.max(data)}")
 
         # plot
         x_axis = np.arange(start=30000, step=config['domain']['evaluation_frequency'], stop=2_000_000)
