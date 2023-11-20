@@ -50,9 +50,9 @@ def generate_model(model_name: str, load_erb: str | None = None, load_q: str | N
     if load_erb is not None:
         model.erb = pickle.load(open(load_erb, 'wb'))
     if load_q is not None:
-        model.critics.load_state_dict(torch.load(load_q + "_twin_critic"))
-        model.critics_optimizer.load_state_dict(torch.load(load_q + "_twin_critics_optimizer"))
-        model.critics_target.load_state_dict(torch.load(load_q + "_target_twin_critic"))
+        model.twin_critic.load_state_dict(torch.load(load_q + "_twin_critic"))
+        model.twin_critic_optimizer.load_state_dict(torch.load(load_q + "_twin_critics_optimizer"))
+        model.twin_critic_optimizer.load_state_dict(torch.load(load_q + "_target_twin_critic"))
     if load_pi is not None:
         assert False, "load_PI not implemented"
         model.actors.load_state_dict(torch.load(load_pi + "_actor"))
