@@ -8,7 +8,6 @@ import os
 import shutil
 import math
 import time
-import copy
 import pickle
 import random
 from icecream import ic
@@ -70,7 +69,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config = yaml.safe_load(open(args.config, 'r'))
 
-    env = mamujoco_v1.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=config['domain']['obsk'], local_categories=[['qpos', 'qvel'], ['qpos']])
+    if config['domain']['name'] == "Ant":
+        env = mamujoco_v1.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=config['domain']['obsk'], local_categories=[['qpos', 'qvel'], ['qpos']], include_cfrc_ext_in_observation=False)
+    else:
+        env = mamujoco_v1.parallel_env(scenario=config['domain']['name'], agent_conf=config['domain']['factorization'], agent_obsk=config['domain']['obsk'], local_categories=[['qpos', 'qvel'], ['qpos']])
 
     num_actions_spaces = [env.action_space(agent).shape[0] for agent in env.possible_agents]
     num_observations_spaces = [env.observation_space(agent).shape[0] for agent in env.possible_agents]
