@@ -38,7 +38,7 @@ def eval_policy(env_name: str, conf: str, obsk: int, seed: int = 256, eval_episo
     return total_return / eval_episodes
 
 
-def generate_model(model_name: str):
+def generate_model(model_name: str, load_erb: str | None = None, load_q: str | None = None, load_pi: str | None = None):
     match model_name:
         case 'TD3':
             return MATD3.model(num_actions_spaces, num_observations_spaces, num_global_observation_space, min_action, max_action, config, torch_device=TORCH_DEVICE)
@@ -46,6 +46,18 @@ def generate_model(model_name: str):
             return MATD3_cc.model(num_actions_spaces, num_observations_spaces, num_global_observation_space, min_action, max_action, config, torch_device=TORCH_DEVICE)
         case _:
             assert False, 'invalid learning algorithm'
+
+    if load_erb is not None:
+        model.erb = pickle.load(open(load_erb, 'wb'))
+    if load_q is not None:
+        model.critics.load_state_dict(torch.load(load_q + "_twin_critic"))
+        model.critics_optimizer.load_state_dict(torch.load(load_q + "_twin_critics_optimizer"))
+        model.critics_target.load_state_dict(torch.load(load_q + "_target_twin_critic"))
+    if load_pi is not None:
+        assert False, "load_PI not implemented"
+        model.actors.load_state_dict(torch.load(load_pi + "_actor"))
+        model.actor_optimizer.load_state_dict(torch.load(load_pi + "_actor_optimizer"))
+        model.actors_target.load_state_dict(torch.load(load_pi + "_target_actor"))
 
 
 if __name__ == "__main__":
@@ -79,7 +91,7 @@ if __name__ == "__main__":
         random.seed(config['domain']['seed'] + run)
 
         # create model
-        model = generate_model(config['domain']['algo'])
+        model = generate_model(config['domain']['algo'], config['other']['load_erb'], config['other']['load_Q'], config['other']['load_PI'])
         #model.twin_critics[0].load_state_dict(torch.load('best_run0_twin_critic_inv_d'))
         #model.target_twin_critics[0].load_state_dict(torch.load('best_run0_target_twin_critic_inv_d'))
         #model.target_actors[0].load_state_dict(torch.load('best_run0_target_actor_inv_d'))

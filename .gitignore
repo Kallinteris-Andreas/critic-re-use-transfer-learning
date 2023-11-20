@@ -6,3 +6,4 @@ __pypache__/*
 notes
 multiagent_mujoco
 .vscode
+gymnasium/*

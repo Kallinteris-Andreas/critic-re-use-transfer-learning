@@ -31,3 +31,7 @@ TD3: # Used by 'TD3' and 'TD3-cc'
   d: 2 # Policy Update Frequency
   mu_bias: True # Bias for the actor module
   q_bias: True # Bias for the critics module
+other:
+  load_erb: null  # load the ERB into the model, (if `null` then no ERB is loaded)
+  load_Q: null  # load the critic into the model, (if `null` then no critic is loaded)
+  load_PI: null
