@@ -41,9 +41,9 @@ def eval_policy(env_name: str, conf: str, obsk: int, seed: int = 256, eval_episo
 def generate_model(model_name: str, load_erb: str | None = None, load_q: str | None = None, load_pi: str | None = None):
     match model_name:
         case 'TD3':
-            return MATD3.model(num_actions_spaces, num_observations_spaces, num_global_observation_space, min_action, max_action, config, torch_device=TORCH_DEVICE)
+            model = MATD3.model(num_actions_spaces, num_observations_spaces, num_global_observation_space, min_action, max_action, config, torch_device=TORCH_DEVICE)
         case 'TD3-cc':
-            return MATD3_cc.model(num_actions_spaces, num_observations_spaces, num_global_observation_space, min_action, max_action, config, torch_device=TORCH_DEVICE)
+            model = MATD3_cc.model(num_actions_spaces, num_observations_spaces, num_global_observation_space, min_action, max_action, config, torch_device=TORCH_DEVICE)
         case _:
             assert False, 'invalid learning algorithm'
 
@@ -58,6 +58,8 @@ def generate_model(model_name: str, load_erb: str | None = None, load_q: str | N
         model.actors.load_state_dict(torch.load(load_pi + "_actor"))
         model.actor_optimizer.load_state_dict(torch.load(load_pi + "_actor_optimizer"))
         model.actors_target.load_state_dict(torch.load(load_pi + "_target_actor"))
+
+        return model
 
 
 if __name__ == "__main__":
