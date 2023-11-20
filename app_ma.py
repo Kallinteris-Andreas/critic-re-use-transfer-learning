@@ -58,7 +58,7 @@ def generate_model(model_name: str, load_erb: str | None = None, load_q: str | N
         model.actor_optimizer.load_state_dict(torch.load(load_pi + "_actor_optimizer"))
         model.actors_target.load_state_dict(torch.load(load_pi + "_target_actor"))
 
-        return model
+    return model
 
 
 if __name__ == "__main__":
