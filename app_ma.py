@@ -12,6 +12,7 @@ import copy
 import pickle
 import random
 from icecream import ic
+from kalli import m_deepcopy
 
 TORCH_DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -133,7 +134,7 @@ if __name__ == "__main__":
                 eval_file.write(str(total_evalution_return) + '\n')
                 if (eval_max_return < total_evalution_return):
                     eval_max_return = total_evalution_return
-                    best_model = copy.deepcopy(model)
+                    best_model = m_deepcopy(model, excluded_keys=['erb'])
 
         best_model.save(eval_path + '/' + 'best_run' + str(run))
         pickle.dump(model.erb, open(eval_path + '/' + 'best_run' + str(run) + '_erb', 'wb'))
