@@ -47,3 +47,4 @@ if __name__ == "__main__":
     file_name = "figure"
     plt.savefig(file_name + ".eps", bbox_inches="tight")
     plt.savefig(file_name + ".png", bbox_inches="tight")
+    plt.savefig(file_name + ".pdf", bbox_inches="tight")
