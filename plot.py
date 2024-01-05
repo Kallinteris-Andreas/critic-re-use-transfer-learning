@@ -33,7 +33,10 @@ if __name__ == "__main__":
         # plot
         x_axis = np.arange(start=30000, step=config['domain']['evaluation_frequency'], stop=2_000_000)
 
-        ax.plot(x_axis, avg, label=f"{config['domain']['factorization']}-{config['domain']['algo']}")
+        label = f"{config['domain']['factorization']}-{config['domain']['algo']}"
+        if config.get("other", None) is not None and config["other"]["load_Q"]:
+            label += " TL"
+        ax.plot(x_axis, avg, label=label)
         ax.fill_between(x_axis, min_v, max_v, alpha=0.2)
 
         ax.set_title("Average Regret over " + str(data.shape[1]) + " statistical runs, on " + config['domain']['name'])
@@ -45,6 +48,8 @@ if __name__ == "__main__":
 
     # file_name = config['domain']['name']
     file_name = "figure"
+    fig.set_figwidth(16)
+    fig.set_figheight(9)
     plt.savefig(file_name + ".eps", bbox_inches="tight")
     plt.savefig(file_name + ".png", bbox_inches="tight")
     plt.savefig(file_name + ".pdf", bbox_inches="tight")
