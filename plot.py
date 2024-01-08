@@ -7,6 +7,7 @@ import yaml
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--result_directory", nargs='+', default='good_res/TD3_InvertedDoublePendulum-v4/')
+    parser.add_argument("--mode", default="average")
     args = parser.parse_args()
     eval_paths = args.result_directory
 
@@ -24,6 +25,7 @@ if __name__ == "__main__":
                 # print(file)
                 files.append(file)
                 data.append(np.genfromtxt(eval_path + "/" + file, delimiter=','))
+        # process data
         data = np.stack(data, axis=1)
         avg = np.average(data, axis=1)
         min_v = np.min(data, axis=1)
@@ -36,18 +38,20 @@ if __name__ == "__main__":
         label = f"{config['domain']['factorization']}-{config['domain']['algo']}"
         if config.get("other", None) is not None and config["other"]["load_Q"]:
             label += " TL"
-        ax.plot(x_axis, avg, label=label)
-        ax.fill_between(x_axis, min_v, max_v, alpha=0.2)
+        if args.mode == "average":
+            ax.plot(x_axis, avg, label=label)
+            ax.fill_between(x_axis, min_v, max_v, alpha=0.2)
+        elif args.mode == "max":
+            ax.plot(x_axis, max_v, label=label)
 
-        ax.set_title("Average Regret over " + str(data.shape[1]) + " statistical runs, on " + config['domain']['name'])
+        ax.set_title("{args.mode} over {str(data.shape[1])} statistical runs, on {config['domain']['name']}")
 
     ax.set_ylabel("Return")
     ax.set_xlabel("Timestep")
     ax.legend()
     # plt.show()
 
-    # file_name = config['domain']['name']
-    file_name = "figure"
+    file_name = "figure_{config['domain']['name']}_{args.mode}"
     fig.set_figwidth(16)
     fig.set_figheight(9)
     plt.savefig(file_name + ".eps", bbox_inches="tight")
