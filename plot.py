@@ -44,14 +44,14 @@ if __name__ == "__main__":
         elif args.mode == "max":
             ax.plot(x_axis, max_v, label=label)
 
-        ax.set_title("{args.mode} over {str(data.shape[1])} statistical runs, on {config['domain']['name']}")
+        ax.set_title(f"{args.mode} over {str(data.shape[1])} statistical runs, on {config['domain']['name']}")
 
     ax.set_ylabel("Return")
     ax.set_xlabel("Timestep")
     ax.legend()
     # plt.show()
 
-    file_name = "figure_{config['domain']['name']}_{args.mode}"
+    file_name = f"figure_{config['domain']['name']}_{args.mode}"
     fig.set_figwidth(16)
     fig.set_figheight(9)
     plt.savefig(file_name + ".eps", bbox_inches="tight")
