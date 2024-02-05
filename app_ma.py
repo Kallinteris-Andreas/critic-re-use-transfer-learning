@@ -10,6 +10,7 @@ import math
 import time
 import pickle
 import random
+import modules
 from icecream import ic
 from kalli import m_deepcopy
 
@@ -53,10 +54,13 @@ def generate_model(model_name: str, load_erb: str | None = None, load_q: str | N
         model.twin_critic_optimizer.load_state_dict(torch.load(load_q + "_twin_critics_optimizer"))
         model.target_twin_critic.load_state_dict(torch.load(load_q + "_target_twin_critic"))
     if load_pi is not None:
-        assert False, "load_PI not implemented"
-        model.actors.load_state_dict(torch.load(load_pi + "_actor"))
-        model.actor_optimizer.load_state_dict(torch.load(load_pi + "_actor_optimizer"))
-        model.actors_target.load_state_dict(torch.load(load_pi + "_target_actor"))
+        actors = torch.load(load_pi + "_actors")
+        for i in range(len(actors)):
+            modules.soft_update_target_network(model.actors[i], actors[i], 1)
+
+        #model.actors_optimizers = torch.load(load_pi + "_actors_optimizers")
+        #model.actors_optimizers.load_state_dict(torch.load(load_pi + "_actors_optimizers"))
+        model.target_actors = torch.load(load_pi + "_target_actors")
 
     return model
 
@@ -96,18 +100,6 @@ if __name__ == "__main__":
 
         # create model
         model = generate_model(config['domain']['algo'], config['other']['load_erb'], config['other']['load_Q'], config['other']['load_PI'])
-        #model.twin_critics[0].load_state_dict(torch.load('best_run0_twin_critic_inv_d'))
-        #model.target_twin_critics[0].load_state_dict(torch.load('best_run0_target_twin_critic_inv_d'))
-        #model.target_actors[0].load_state_dict(torch.load('best_run0_target_actor_inv_d'))
-        #model.actors[0].load_state_dict(torch.load('best_run0_actor_inv_d'))
-
-        #model.twin_critics[0].load_state_dict(torch.load('best_run0_twin_critic_hopper'))
-        #model.target_twin_critics[0].load_state_dict(torch.load('best_run0_twin_critic_hopper'))
-        #model.target_actors[0].load_state_dict(torch.load('best_run0_actor_hopper'))
-        #model.actors[0].load_state_dict(torch.load('best_run0_actor_hopper'))
-
-        #model.actors[0].load_state_dict(torch.load('best_run0_actor_inv'))
-        #model.twin_critics[0].load_state_dict(torch.load('best_run0_critic_inv'))
 
         # create evaluation file
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
