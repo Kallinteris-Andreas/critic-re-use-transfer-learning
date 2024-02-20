@@ -30,13 +30,15 @@ if __name__ == "__main__":
         avg = np.average(data, axis=1)
         min_v = np.min(data, axis=1)
         max_v = np.max(data, axis=1)
-        print(f"the best is: {files[np.argmax(np.max(data, axis=0))]}, with max = {np.max(data)}")
+        print(f"the best of {eval_path} is: {files[np.argmax(np.max(data, axis=0))]}, with max = {np.max(data)}")
 
         # plot
         x_axis = np.arange(start=30000, step=config['domain']['evaluation_frequency'], stop=2_000_000)
 
         label = f"{config['domain']['factorization']}-{config['domain']['algo']}"
-        if config.get("other", None) is not None and config["other"]["load_Q"]:
+        if config.get("other", None) is not None and config["other"]["load_Q"] and config["other"]["load_PI"]:
+            label += " TLR"
+        elif config.get("other", None) is not None and config["other"]["load_Q"]:
             label += " TL"
         if args.mode == "average":
             ax.plot(x_axis, avg, label=label)
