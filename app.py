@@ -77,15 +77,6 @@ if __name__ == "__main__":
         random.seed(config['domain']['seed'] + run)
 
         model = generate_model(config['domain']['algo'])
-        #model.critics.load_state_dict(torch.load('best_run0_twin_critic_inv_d'))
-        #model.target_critics.load_state_dict(torch.load('best_run0_target_twin_critic_inv_d'))
-        #model.target_actor.load_state_dict(torch.load('best_run0_target_actor_inv_d'))
-        #model.actor.load_state_dict(torch.load('best_run0_actor_inv_d'))
-
-        #model.critics.load_state_dict(torch.load('best_run0_twin_critic_hopper'))
-        #model.target_critics.load_state_dict(torch.load('best_run0_twin_critic_hopper'))
-        #model.target_actor.load_state_dict(torch.load('best_run0_actor_hopper'))
-        #model.actor.load_state_dict(torch.load('best_run0_actor_hopper'))
 
         # create evaluation file
         eval_file = open(eval_path + '/score' + str(run) + '.csv', 'w+')
