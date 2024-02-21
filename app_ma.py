@@ -58,8 +58,6 @@ def generate_model(model_name: str, load_erb: str | None = None, load_q: str | N
         for i in range(len(actors)):
             modules.soft_update_target_network(model.actors[i], actors[i], 1)
 
-        #model.actors_optimizers = torch.load(load_pi + "_actors_optimizers")
-        #model.actors_optimizers.load_state_dict(torch.load(load_pi + "_actors_optimizers"))
         model.target_actors = torch.load(load_pi + "_target_actors")
 
     return model

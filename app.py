@@ -55,6 +55,8 @@ if __name__ == "__main__":
     config = yaml.safe_load(open(args.config, 'r'))
     config['domain']['name'] += '-v5'
 
+    if config['domain']['name'] in ["Humanoid-v5", "HumanoidStandup-v5"]:
+        env = gymnasium.make(config['domain']['name'], include_cinert_in_observation=False, include_cvel_in_observation=False, include_qfrc_actuator_in_observation=False, include_cfrc_ext_in_observation=False)
     if config['domain']['name'] == "Ant-v5":
         env = gymnasium.make(config['domain']['name'], include_cfrc_ext_in_observation=False)
     else:
