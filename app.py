@@ -1,6 +1,5 @@
 import torch
 import gymnasium
-import copy
 import pickle
 import time
 import yaml
