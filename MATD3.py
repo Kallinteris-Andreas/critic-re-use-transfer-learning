@@ -3,7 +3,6 @@ import copy
 # import pickle
 import ERB
 import modules
-from icecream import ic
 
 
 class model():
