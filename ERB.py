@@ -1,3 +1,4 @@
+# Note this implamention of the ERB is not memory layout efficent, i would reccomend against using it, though it is an correct
 import collections
 import random
 import torch
