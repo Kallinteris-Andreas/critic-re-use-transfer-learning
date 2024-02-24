@@ -36,10 +36,15 @@ if __name__ == "__main__":
         x_axis = np.arange(start=30000, step=config['domain']['evaluation_frequency'], stop=2_000_000)
 
         label = f"{config['domain']['factorization']}-{config['domain']['algo']}"
+        linestyle = "solid"
+
         if config.get("other", None) is not None and config["other"]["load_Q"] and config["other"]["load_PI"]:
             label += " TLR"
+            linestyle='dashed'
         elif config.get("other", None) is not None and config["other"]["load_Q"]:
             label += " TL"
+            linestyle='dashdot'
+
         if args.mode == "average":
             ax.plot(x_axis, avg, label=label)
             ax.fill_between(x_axis, min_v, max_v, alpha=0.2)
@@ -53,7 +58,7 @@ if __name__ == "__main__":
     ax.legend()
     # plt.show()
 
-    file_name = f"figure_{config['domain']['name']}_{args.mode}"
+    file_name = f"./plot/figure_{config['domain']['name']}_{args.mode}"
     fig.set_figwidth(16)
     fig.set_figheight(9)
     plt.savefig(file_name + ".eps", bbox_inches="tight")
