@@ -40,16 +40,16 @@ if __name__ == "__main__":
 
         if config.get("other", None) is not None and config["other"]["load_Q"] and config["other"]["load_PI"]:
             label += " TLR"
-            linestyle='dashed'
+            linestyle = 'dashed'
         elif config.get("other", None) is not None and config["other"]["load_Q"]:
             label += " TL"
-            linestyle='dashdot'
+            linestyle = 'dashdot'
 
         if args.mode == "average":
-            ax.plot(x_axis, avg, label=label)
+            ax.plot(x_axis, avg, label=label, linestyle=linestyle)
             ax.fill_between(x_axis, min_v, max_v, alpha=0.2)
         elif args.mode == "max":
-            ax.plot(x_axis, max_v, label=label)
+            ax.plot(x_axis, max_v, label=label, linestyle=linestyle)
 
         ax.set_title(f"{args.mode} over {str(data.shape[1])} statistical runs, on {config['domain']['name']}")
 
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     ax.legend()
     # plt.show()
 
-    file_name = f"./plot/figure_{config['domain']['name']}_{args.mode}"
+    file_name = f"./figures/figure_{config['domain']['name']}_{args.mode}"
     fig.set_figwidth(16)
     fig.set_figheight(9)
     plt.savefig(file_name + ".eps", bbox_inches="tight")
