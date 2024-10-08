@@ -61,6 +61,6 @@ if __name__ == "__main__":
     file_name = f"./figures/figure_{config['domain']['name']}_{args.mode}"
     fig.set_figwidth(16)
     fig.set_figheight(9)
-    plt.savefig(file_name + ".eps", bbox_inches="tight")
+    # plt.savefig(file_name + ".eps", bbox_inches="tight")
     plt.savefig(file_name + ".png", bbox_inches="tight")
     plt.savefig(file_name + ".pdf", bbox_inches="tight")
