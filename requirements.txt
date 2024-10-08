@@ -1,0 +1,8 @@
+# gymnasium==1.0.0a2
+# gymnasium_robotics>1.2.3
+mujoco==2.3.3
+numpy==1.24.3
+torch==2.0.0
+matplotlib
+pyyaml
+# python==3.10

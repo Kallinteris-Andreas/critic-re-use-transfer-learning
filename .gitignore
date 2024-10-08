@@ -7,3 +7,5 @@ notes
 multiagent_mujoco
 .vscode
 gymnasium/*
+
+test_env/*
