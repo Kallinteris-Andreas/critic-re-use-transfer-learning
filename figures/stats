@@ -1,0 +1,17 @@
+the best of models/MATD3-cc_2x4_TNL is: score0.csv, with max = 6154.696066455922
+the best of models/MATD3-cc_2x4d_Ant_TNL is: score0.csv, with max = 6196.58536434311
+the best of models/MATD3-cc_4x2_Ant_TNL is: score0.csv, with max = 6270.753631588732
+
+the best of results/vault/TD3_Ant-v5_1697532089.9189715/ is: score3.csv, with max = 6556.940012903343
+the best of results/vault/MATD3_2x4_Ant_1700507148.252164/ is: score5.csv, with max = 6011.71838870303
+the best of results/vault/MATD3_2x4d_Ant_1700507326.8253415/ is: score4.csv, with max = 6016.630119474885
+the best of results/vault/MATD3_4x2_Ant_1700480193.70154/ is: score1.csv, with max = 5951.100563128493
+the best of results/vault/MATD3-cc_2x4_Ant_1700480061.9332101/ is: score9.csv, with max = 6424.032486686388
+the best of results/vault/MATD3-cc_2x4d_Ant_1700480106.8648412/ is: score7.csv, with max = 6224.868616432248
+the best of results/vault/MATD3-cc_4x2_Ant_1700480166.2900493/ is: score1.csv, with max = 6244.495955477116
+the best of results/vault/MATD3-cc_2x4_Ant_TL/ is: score4.csv, with max = 4802.95879727943
+the best of results/vault/MATD3-cc_2x4d_Ant_TL/ is: score4.csv, with max = 3641.4516686451598
+the best of results/vault/MATD3-cc_4x2_Ant_TL/ is: score5.csv, with max = 4488.494512955911
+the best of results/vault/MATD3-cc_2x4_Ant_TLR/ is: score9.csv, with max = 3921.9793295363547
+the best of results/vault/MATD3-cc_2x4d_Ant_TLR/ is: score8.csv, with max = 6389.1128932423635
+the best of results/vault/MATD3-cc_4x2_Ant_TLR/ is: score0.csv, with max = 4194.361146321929

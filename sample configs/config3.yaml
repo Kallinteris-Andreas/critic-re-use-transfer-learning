@@ -1,0 +1,37 @@
+domain:
+  name: Ant
+  factorization: 4x2 # agent factorization used, check MaMuJoCo Doc for more info
+  obsk: 1 # check MaMuJoCo Doc for more info
+  total_timesteps: 2_000_000 # how many learn steps the agent should take
+  #episodes: 1000
+  algo: TD3-cc # Valid values: 'DDPG', 'TD3', 'TD3-cc'
+  init_learn_timestep: 25001 # at which timestep should the agent start learning
+  #learning_starts_ep: 10 # Start Learning at episode X, before that fill the ERB with random actions
+  evaluation_frequency: 5000 # how ofter should the agent be evaluated
+  runs: 10 # number of statistical runs
+  seed: 64 # seeds the enviroment
+DDPG:
+  gamma: 0.99 # Reward Discount rate
+  tau: 0.01 # Target Network Update rate
+  N: 100 # Experience Replay Buffer's mini match size
+  experience_replay_buffer_size: 1000000
+  sigma: 0.1 # standard deviation of the action process for exploration
+  optimizer_gamma: 0.001 # the learning rate of the optimizers
+  mu_bias: True # Bias for the actor module
+  q_bias: True # Bias for the critic module
+TD3: # Used by 'TD3' and 'TD3-cc'
+  gamma: 0.99 # Reward Discount rate
+  tau: 0.005 # Target Network Update rate
+  N: 256 # Experience Replay Buffer's mini match size
+  experience_replay_buffer_size: 1000000
+  sigma_policy: 0.2 # Standard deviation of the action process for policy update
+  sigma_explore: 0.1 # Standard deviation of the action process for exploration
+  optimizer_gamma: 0.001 # The learning rate of the optimizers
+  noise_policy_clip: 0.5 # Clamping for the target noise
+  d: 2 # Policy Update Frequency
+  mu_bias: True # Bias for the actor module
+  q_bias: True # Bias for the critics module
+other:
+  load_erb: null  # load the ERB into the model, (if `null` then no ERB is loaded)
+  load_Q: models/best_ant  # load the critic into the model, (if `null` then no critic is loaded)
+  load_PI: models/MATD3-cc_4x2_Ant_TNL/best_run0
