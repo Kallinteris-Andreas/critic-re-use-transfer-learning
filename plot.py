@@ -44,6 +44,7 @@ if __name__ == "__main__":
         elif config.get("other", None) is not None and config["other"]["load_Q"]:
             label += " TL"
             linestyle = 'dashdot'
+        # linestyle = "solid"  # for TP
 
         if args.mode == "average":
             ax.plot(x_axis, avg, label=label, linestyle=linestyle)
@@ -59,6 +60,7 @@ if __name__ == "__main__":
     # plt.show()
 
     file_name = f"./figures/figure_{config['domain']['name']}_{args.mode}"
+    # file_name = f"./figures/figure_TP_{args.mode}"  # for TP
     fig.set_figwidth(16)
     fig.set_figheight(9)
     # plt.savefig(file_name + ".eps", bbox_inches="tight")
